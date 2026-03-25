@@ -19,8 +19,9 @@ public class Pago {
     @Column(name = "monto", nullable = false)
     private double monto;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "metodo_pago", nullable = false)
-    private String metodoPago;
+    private MetodoPago metodoPago;
 
     @Column(name = "fecha_pago", nullable = false)
     private String fechaPago;

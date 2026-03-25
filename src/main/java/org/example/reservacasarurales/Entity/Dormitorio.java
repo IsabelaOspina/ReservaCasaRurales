@@ -13,8 +13,8 @@ import lombok.*;
 public class Dormitorio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "codigo_habitacion")
-    private Long codigoHabitacion;
+    @Column(name = "id_dormitorio")
+    private Long idDormitorio;
 
     @Column(name = "num_camas")
     private int numeroCamas;
