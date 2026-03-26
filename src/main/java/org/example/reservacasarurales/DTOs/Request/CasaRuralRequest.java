@@ -13,6 +13,6 @@ public class CasaRuralRequest {
     private int numeroCocinas;
     private int numeroComedores;
     private int plazasGaraje;
-    private List<String> fotos; // URLs o paths
+    private List<FotoRequest> fotos; // URLs o paths
 
 }

@@ -11,5 +11,5 @@ public class CasaRuralResponse {
     private int numeroCocinas;
     private int numeroComedores;
     private int plazasGaraje;
-    private List<String> fotos;
+    private List<FotoResponse> fotos;
 }
