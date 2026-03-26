@@ -4,12 +4,15 @@ import org.example.reservacasarurales.DTOs.Request.FotoRequest;
 import org.example.reservacasarurales.DTOs.Response.FotoResponse;
 import org.example.reservacasarurales.Entity.Foto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface FotoMapper {
-    FotoResponse toResponse(Foto foto);
-    Foto toEntity(FotoResponse response);
 
+    // Mapea Foto a FotoResponse
+    FotoResponse toResponse(Foto foto);
+
+    // Mapea FotoRequest a Foto
+    Foto toEntity(FotoRequest request);
 }

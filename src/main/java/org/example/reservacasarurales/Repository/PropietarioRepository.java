@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface PropietarioRepository extends JpaRepository<Propietario, Long> {
     Optional<Propietario> findByCorreoElectronico(String correoElectronico);
+    Optional<Propietario> findByIdPropietario(Long idPropietario);
 }

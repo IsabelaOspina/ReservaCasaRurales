@@ -1,7 +1,10 @@
 package org.example.reservacasarurales.DTOs.Response;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class CasaRuralResponse {
     private Long codigoCasa;
     private String poblacion;
