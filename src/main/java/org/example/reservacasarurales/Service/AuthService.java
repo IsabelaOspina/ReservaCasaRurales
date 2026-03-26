@@ -1,6 +1,5 @@
 package org.example.reservacasarurales.Service;
 
-import jakarta.persistence.Entity;
 import org.example.reservacasarurales.Config.JwtUtil;
 import org.example.reservacasarurales.DTOs.Request.LoginRequest;
 import org.example.reservacasarurales.DTOs.Request.RegistroRequest;
@@ -11,7 +10,6 @@ import org.example.reservacasarurales.Mapper.UsuarioMapper;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +31,7 @@ public class AuthService {
 
     //HU001
     public RegistroResponse registrarPropietario(RegistroRequest request) {
-        if (propietarioRepository.findByEmail(request.getCorreo_electronico()).isPresent()) {
+        if (propietarioRepository.findByCorreoElectronico(request.getCorreoElectronico()).isPresent()) {
             throw new IllegalArgumentException("Usuario ya existe");
         }
         Propietario propietario = usuarioMapper.toEntity(request);
@@ -48,7 +46,7 @@ public class AuthService {
     //HU002
     public LoginResponse login(LoginRequest request) {
         Optional<Propietario> optionalUsuario =
-                propietarioRepository.findByEmail(request.getCorreo_electronico());
+                propietarioRepository.findByCorreoElectronico(request.getCorreoElectronico());
 
         // Si no existe el usuario
         if (optionalUsuario.isEmpty()) {

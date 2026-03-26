@@ -7,7 +7,7 @@ public class RegistroRequest {
     private String nombre;
     private String usuario;
     private String contraseña;
-    private String correo_electronico;
+    private String correoElectronico;
     private String telefonoContacto;
     private String numeroCuenta;
 }

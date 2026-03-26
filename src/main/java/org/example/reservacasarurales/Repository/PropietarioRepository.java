@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface PropietarioRepository extends JpaRepository<Propietario, Long> {
-    Optional<Propietario> findByEmail(String correoElectronico);
+    Optional<Propietario> findByCorreoElectronico(String correoElectronico);
 }

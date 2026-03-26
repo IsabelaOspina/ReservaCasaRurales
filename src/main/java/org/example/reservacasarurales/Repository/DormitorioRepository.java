@@ -11,6 +11,6 @@ public interface DormitorioRepository extends JpaRepository<Dormitorio, Long> {
     List<Dormitorio> findByCasaRuralCodigoCasa(Long codigoCasa);
 
     // Buscar una habitación específica por su código dentro de la casa
-    Optional<Dormitorio> findByCodigoHabitacionAndCasaRuralCodigoCasa(Long codigoHabitacion, Long codigoCasa);
+    Optional<Dormitorio> findByIdDormitorioAfterAndCasaRuralCodigoCasa(Long idDormitorio, Long codigoCasa);
 }
 

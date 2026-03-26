@@ -5,9 +5,11 @@ import org.example.reservacasarurales.DTOs.Response.RegistroResponse;
 import org.example.reservacasarurales.Entity.Foto;
 import org.example.reservacasarurales.Entity.Propietario;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
+    @Mapping(target = "correoElectronico", source = "correoElectronico")
     Propietario toEntity(RegistroRequest request);
     RegistroResponse toResponse(Propietario propietario);
 }
