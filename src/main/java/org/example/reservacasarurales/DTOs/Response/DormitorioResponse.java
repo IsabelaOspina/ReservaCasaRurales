@@ -9,5 +9,6 @@ public class DormitorioResponse {
     private int numeroCamas;
     private TipoCama tipoCama;
     private boolean tieneBano;
+    private Long codigoCasa;
 
 }

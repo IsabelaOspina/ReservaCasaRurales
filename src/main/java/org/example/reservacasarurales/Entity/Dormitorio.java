@@ -27,7 +27,7 @@ public class Dormitorio {
     private boolean tieneBano;
 
     @ManyToOne
-    @JoinColumn(name = "id_casa", nullable = false)
+    @JoinColumn(name = "codigoCasa", nullable = false)
     private CasaRural casaRural;
 }
 

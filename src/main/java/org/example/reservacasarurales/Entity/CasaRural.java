@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "casa_rurales")
+@Table(name = "casas_rurales")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -43,6 +43,13 @@ public class CasaRural {
     @ManyToOne
     @JoinColumn(name = "propietario_id", nullable = false)
     private Propietario propietario;
+
+    @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dormitorio> dormitorios = new ArrayList<>();
+
+
+    @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Cocina> cocinas = new ArrayList<>();
 
     @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Foto> fotos = new ArrayList<>();
