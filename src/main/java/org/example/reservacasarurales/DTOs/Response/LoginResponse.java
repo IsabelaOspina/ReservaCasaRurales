@@ -5,7 +5,12 @@ import lombok.Data;
 @Data
 public class LoginResponse {
     private String token; // JWT
-    private String usuario;
-    private String mensaje; // "Login correcto"
 
+    public LoginResponse(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
 }

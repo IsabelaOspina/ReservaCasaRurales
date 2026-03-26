@@ -2,9 +2,11 @@ package org.example.reservacasarurales.Config;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+@Component
 public class JwtUtil {
     private final String SECRET = "mi_clave_super_secreta";
 
