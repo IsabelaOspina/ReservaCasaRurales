@@ -26,7 +26,7 @@ public class Propietario {
     private String usuario;
 
     @Column(name = "contraseña",nullable = false)
-    private String contraseña;
+    private String password;
 
     @Column(name = "correo_electronico", nullable = false, unique = true, length = 100)
     private String correoElectronico;
