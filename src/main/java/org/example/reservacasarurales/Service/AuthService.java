@@ -35,7 +35,7 @@ public class AuthService {
             throw new IllegalArgumentException("Usuario ya existe");
         }
         Propietario propietario = usuarioMapper.toEntity(request);
-        propietario.setPassword(passwordEncoder.encode(request.getContraseña()));
+        propietario.setPassword(passwordEncoder.encode(request.getPassword()));
 
         propietarioRepository.save(propietario);
 
@@ -56,7 +56,7 @@ public class AuthService {
         Propietario propietario = optionalUsuario.get();
 
         // Si la contraseña no coincide
-        if (!passwordEncoder.matches(request.getContraseña(), propietario.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), propietario.getPassword())) {
             throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
         String token = jwtUtil.generarToken(propietario.getCorreoElectronico());
