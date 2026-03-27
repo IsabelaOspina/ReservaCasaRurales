@@ -47,7 +47,6 @@ public class CasaRural {
     @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dormitorio> dormitorios = new ArrayList<>();
 
-
     @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cocina> cocinas = new ArrayList<>();
 

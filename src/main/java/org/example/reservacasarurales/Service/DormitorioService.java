@@ -11,6 +11,8 @@ import org.example.reservacasarurales.Repository.DormitorioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DormitorioService {
     @Autowired
@@ -43,5 +45,16 @@ public class DormitorioService {
         return response;
 
     }
+
+    public List<DormitorioResponse> listarDormitorios(Long codigoCasa) {
+        CasaRural casa = casaRuralRepository.findByCodigoCasa(codigoCasa)
+                .orElseThrow(() -> new RuntimeException("Casa rural no encontrada"));
+
+        return dormitorioRepository.findByCasaRuralCodigoCasa(codigoCasa)
+                .stream()
+                .map(dormitorioMapper::toResponse)
+                .toList();
+    }
+
 
 }
