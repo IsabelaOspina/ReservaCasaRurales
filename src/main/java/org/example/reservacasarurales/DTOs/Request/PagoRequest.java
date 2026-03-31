@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class PagoRequest {
+    private Long reservaId;
     private double monto;
     private MetodoPago metodoPago;
     private LocalDate fechaPago;

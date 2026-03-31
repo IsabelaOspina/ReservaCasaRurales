@@ -19,6 +19,9 @@ public class Dormitorio {
     @Column(name = "num_camas")
     private int numeroCamas;
 
+    @Column(name = "nombre")
+    private String nombre;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_cama", nullable = false)
     private TipoCama tipoCama;

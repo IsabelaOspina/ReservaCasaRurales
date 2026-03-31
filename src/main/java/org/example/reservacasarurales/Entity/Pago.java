@@ -1,5 +1,7 @@
 package org.example.reservacasarurales.Entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,13 +26,14 @@ public class Pago {
     private MetodoPago metodoPago;
 
     @Column(name = "fecha_pago", nullable = false)
-    private String fechaPago;
+    private LocalDate fechaPago;
 
     @Column(name = "confirmado", nullable = false)
     private boolean confirmado;
 
-    //falta relacion con reserva
-    
+    @ManyToOne
+    @JoinColumn(name = "id_reserva")
+    private Reserva reserva;
 }
 
 

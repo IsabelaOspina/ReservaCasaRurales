@@ -1,0 +1,40 @@
+package org.example.reservacasarurales.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.example.reservacasarurales.Entity.Reserva;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ReservaRepository extends JpaRepository<Reserva, Long> {
+
+    // HU020 - Validar disponibilidad REAL de la casa
+    @Query("""
+    SELECT r FROM Reserva r
+    WHERE r.casaRural.id = :casaId
+    AND r.confirmada = true
+    AND (
+        (:fechaInicio BETWEEN r.fechaInicio AND r.fechaFin)
+        OR (:fechaFin BETWEEN r.fechaInicio AND r.fechaFin)
+        OR (r.fechaInicio BETWEEN :fechaInicio AND :fechaFin)
+    )
+    """)
+    List<Reserva> buscarReservasEnConflicto(
+            @Param("casaId") Long casaId,
+            @Param("fechaInicio") LocalDate fechaInicio,
+            @Param("fechaFin") LocalDate fechaFin
+    );
+
+    // HU014 - Validar dormitorios
+    @Query("""
+    SELECT DISTINCT r FROM Reserva r
+    JOIN r.dormitorios d
+    WHERE d.id IN :ids
+    AND r.confirmada = true
+    """)
+    List<Reserva> findReservasPorDormitorios(@Param("ids") List<Long> ids);
+}

@@ -5,8 +5,11 @@ import org.example.reservacasarurales.DTOs.Response.CasaRuralResponse;
 import org.example.reservacasarurales.Entity.CasaRural;
 import org.example.reservacasarurales.Entity.Foto;
 import org.example.reservacasarurales.Entity.Propietario;
+import org.example.reservacasarurales.Entity.TipoCama;
+import org.example.reservacasarurales.Entity.Dormitorio;
 import org.example.reservacasarurales.Mapper.CasaRuralMapper;
 import org.example.reservacasarurales.Repository.CasaRuralRepository;
+import org.example.reservacasarurales.Repository.DormitorioRepository;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ public class CasaRuralService {
     @Autowired
     private CasaRuralMapper casaRuralMapper;
 
+    @Autowired
+    private DormitorioRepository dormitorioRepository;
 
     //HU003
     public CasaRuralResponse registrarCasaRural(CasaRuralRequest casaRuralRequest, Long idPropietario) {
@@ -50,6 +55,16 @@ public class CasaRuralService {
         }
 
         CasaRural saved = casaRuralRepository.save(casa);
+
+        
+        for (int i = 1; i <= casaRuralRequest.getNumeroDormitorios(); i++) {
+            Dormitorio dormitorio = new Dormitorio();
+            dormitorio.setCasaRural(saved);
+            dormitorio.setNombre("Habitación " + i);
+            dormitorio.setTipoCama(TipoCama.SENCILLA);
+
+            dormitorioRepository.save(dormitorio);
+        }
 
         return casaRuralMapper.toResponse(saved);
     }
