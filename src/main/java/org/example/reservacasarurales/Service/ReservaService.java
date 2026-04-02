@@ -1,19 +1,25 @@
 package org.example.reservacasarurales.Service;
 
-import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
-import org.example.reservacasarurales.Entity.Cliente;
-import org.example.reservacasarurales.Entity.EstadoReserva;
-import org.example.reservacasarurales.Entity.Reserva;
-import org.example.reservacasarurales.Exception.BusinessException;
-import org.example.reservacasarurales.Exception.ResourceNotFoundException;
-import org.example.reservacasarurales.Repository.ClienteRepository;
-import org.example.reservacasarurales.Repository.ReservaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.example.reservacasarurales.DTOs.Request.DisponibilidadRequest;
+import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
+import org.example.reservacasarurales.DTOs.Response.DisponibilidadResponse;
+import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
+import org.example.reservacasarurales.Entity.CasaRural;
+import org.example.reservacasarurales.Entity.Dormitorio;
+import org.example.reservacasarurales.Entity.PaqueteAlquiler;
+import org.example.reservacasarurales.Entity.Reserva;
+import org.example.reservacasarurales.Mapper.ReservaMapper;
+import org.example.reservacasarurales.Repository.CasaRuralRepository;
+import org.example.reservacasarurales.Repository.DormitorioRepository;
+import org.example.reservacasarurales.Repository.PaqueteRepository;
+import org.example.reservacasarurales.Repository.ReservaRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class ReservaService {
@@ -22,64 +28,130 @@ public class ReservaService {
     private ReservaRepository reservaRepository;
 
     @Autowired
-    private ClienteRepository clienteRepository;
 
-    @Transactional
-    public Reserva crear(ReservaRequest request) {
-        Cliente cliente = clienteRepository.findById(request.getClienteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + request.getClienteId()));
+    private CasaRuralRepository casaRepository;
 
-        if (request.getFechaInicio().isAfter(request.getFechaFin())) {
-            throw new BusinessException("La fecha de inicio debe ser anterior a la fecha de fin");
+    @Autowired
+    private PaqueteRepository paqueteRepository;
+
+    @Autowired
+    private DormitorioRepository dormitorioRepository;
+
+    @Autowired
+    private ReservaMapper mapper;
+
+    
+    // CREAR RESERVA (HU013, HU014, HU017)
+    
+    public ReservaResponse crearReserva(ReservaRequest request) {
+
+        CasaRural casa = casaRepository.findById(request.getCasaId())
+                .orElseThrow(() -> new RuntimeException("Casa no encontrada"));
+
+        PaqueteAlquiler paquete = paqueteRepository.findById(request.getPaqueteId())
+                .orElseThrow(() -> new RuntimeException("Paquete no encontrado"));
+
+        LocalDate fechaInicio = request.getFechaInicio();
+        LocalDate fechaFin = fechaInicio.plusDays(request.getNoches());
+
+        // Validar disponibilidad general
+        validarDisponibilidadCasa(request.getCasaId(), fechaInicio, fechaFin);
+
+        // Validar dormitorios (HU014)
+        if (request.getDormitoriosIds() != null && !request.getDormitoriosIds().isEmpty()) {
+            validarDisponibilidadDormitorios(
+                    request.getDormitoriosIds(),
+                    fechaInicio,
+                    request.getNoches()
+            );
         }
 
-        if (request.getFechaInicio().isBefore(LocalDate.now())) {
-            throw new BusinessException("La fecha de inicio no puede ser anterior a hoy");
+        Reserva reserva = mapper.toEntity(request, casa, paquete);
+
+        
+        if (request.getDormitoriosIds() != null && !request.getDormitoriosIds().isEmpty()) {
+            List<Dormitorio> dormitorios = dormitorioRepository.findAllById(request.getDormitoriosIds());
+
+            if (dormitorios.size() != request.getDormitoriosIds().size()) {
+                throw new RuntimeException("Uno o más dormitorios no existen");
+            }
+
+            reserva.setDormitorios(dormitorios);
         }
 
-        Reserva reserva = new Reserva();
-        reserva.setFechaInicio(request.getFechaInicio());
-        reserva.setFechaFin(request.getFechaFin());
-        reserva.setCliente(cliente);
-        reserva.setEstado(EstadoReserva.PENDIENTE);
+        
+        reserva.setFechaInicio(fechaInicio);
+        reserva.setFechaFin(fechaFin);
+        reserva.setConfirmada(false);
+        reserva.setFechaCreacion(LocalDate.now());
+        reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); // HU017
 
-        return reservaRepository.save(reserva);
+        return mapper.toResponse(reservaRepository.save(reserva));
     }
 
-    @Transactional(readOnly = true)
-    public List<Reserva> listar() {
-        return reservaRepository.findAll();
+    
+    // DISPONIBILIDAD (HU020)
+    
+    public DisponibilidadResponse verificarDisponibilidad(DisponibilidadRequest request) {
+
+        CasaRural casa = casaRepository.findById(request.getCasaId())
+                .orElseThrow(() -> new RuntimeException("La casa rural no existe"));
+
+        LocalDate inicio = request.getFechaInicio();
+        LocalDate fin = inicio.plusDays(request.getNoches());
+
+        List<Reserva> conflictos = reservaRepository.buscarReservasEnConflicto(
+                request.getCasaId(),
+                inicio,
+                fin
+        );
+
+        boolean disponible = conflictos.isEmpty();
+
+        return new DisponibilidadResponse(
+                disponible,
+                disponible ? "Disponible" : "No disponible en esas fechas"
+        );
     }
 
-    @Transactional(readOnly = true)
-    public Reserva buscarPorId(Long id) {
-        return reservaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + id));
+    
+    // VALIDAR CASA
+    
+    private void validarDisponibilidadCasa(Long casaId, LocalDate inicio, LocalDate fin) {
+
+        List<Reserva> conflictos = reservaRepository.buscarReservasEnConflicto(
+                casaId,
+                inicio,
+                fin
+        );
+
+        if (!conflictos.isEmpty()) {
+            throw new RuntimeException("La casa ya está reservada en esas fechas");
+        }
     }
 
-    @Transactional(readOnly = true)
-    public List<Reserva> listarPorCliente(Long clienteId) {
-        clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con id: " + clienteId));
-        return reservaRepository.findByClienteId(clienteId);
-    }
+    
+    // VALIDAR DORMITORIOS
+    
+    public void validarDisponibilidadDormitorios(List<Long> dormitoriosIds,
+                                                 LocalDate inicioNueva,
+                                                 int noches) {
 
-    @Transactional(readOnly = true)
-    public List<Reserva> listarPorEstado(EstadoReserva estado) {
-        return reservaRepository.findByEstado(estado);
-    }
+        List<Reserva> reservas = reservaRepository.findReservasPorDormitorios(dormitoriosIds);
 
-    @Transactional
-    public Reserva cambiarEstado(Long id, EstadoReserva nuevoEstado) {
-        Reserva reserva = buscarPorId(id);
-        reserva.setEstado(nuevoEstado);
-        return reservaRepository.save(reserva);
-    }
+        LocalDate finNueva = inicioNueva.plusDays(noches);
 
-    @Transactional
-    public Reserva cancelar(Long id) {
-        Reserva reserva = buscarPorId(id);
-        reserva.setEstado(EstadoReserva.CANCELADA);
-        return reservaRepository.save(reserva);
+        for (Reserva r : reservas) {
+
+            LocalDate inicioExistente = r.getFechaInicio();
+            LocalDate finExistente = r.getFechaFin();
+
+            boolean seCruzan = !(finNueva.isBefore(inicioExistente) || inicioNueva.isAfter(finExistente));
+
+            if (seCruzan) {
+                throw new RuntimeException("Dormitorio ya reservado en esas fechas");
+            }
+        }
+
     }
 }

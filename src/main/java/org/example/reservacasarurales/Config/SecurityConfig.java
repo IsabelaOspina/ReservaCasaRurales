@@ -3,6 +3,7 @@ package org.example.reservacasarurales.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,13 +19,19 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
+
+        return http
+                .csrf(csrf -> csrf.disable())   // esto evita el 403 en POST
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // Permite todas las peticiones sin autenticación
-                );
-        return http.build();
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().permitAll()   // IMPORTANTE: por ahora deja todo libre
+                )
+                .build();
     }
+
+
 }
