@@ -1,6 +1,7 @@
 package org.example.reservacasarurales.DTOs.Request;
 
 import java.time.LocalDate;
+
 import java.util.List;
 
 import lombok.Data;
@@ -14,3 +15,4 @@ public class ReservaRequest {
     private Long paqueteId;
     private List<Long> dormitoriosIds;
 }
+

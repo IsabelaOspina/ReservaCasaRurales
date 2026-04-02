@@ -1,5 +1,6 @@
 package org.example.reservacasarurales.Repository;
 
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,4 +38,5 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     AND r.confirmada = true
     """)
     List<Reserva> findReservasPorDormitorios(@Param("ids") List<Long> ids);
+
 }

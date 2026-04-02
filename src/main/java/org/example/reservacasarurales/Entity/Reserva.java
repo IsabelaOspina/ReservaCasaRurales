@@ -1,6 +1,7 @@
 package org.example.reservacasarurales.Entity;
 
 import jakarta.persistence.*;
+
 import lombok.*;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_reserva")
+
     private Long id;
 
     @Column(name = "fecha_inicio", nullable = false)
@@ -60,4 +62,16 @@ public class Reserva {
 
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<Pago> pagos;
+
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id", nullable = false)
+    private Cliente cliente;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoReserva estado;
+
+
+
 }

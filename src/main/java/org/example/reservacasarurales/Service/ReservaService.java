@@ -1,5 +1,6 @@
 package org.example.reservacasarurales.Service;
 
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.example.reservacasarurales.Repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
 @Service
 public class ReservaService {
 
@@ -26,6 +28,7 @@ public class ReservaService {
     private ReservaRepository reservaRepository;
 
     @Autowired
+
     private CasaRuralRepository casaRepository;
 
     @Autowired
@@ -149,5 +152,6 @@ public class ReservaService {
                 throw new RuntimeException("Dormitorio ya reservado en esas fechas");
             }
         }
+
     }
 }

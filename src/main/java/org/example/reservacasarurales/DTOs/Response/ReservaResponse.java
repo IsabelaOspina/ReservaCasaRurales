@@ -2,6 +2,7 @@ package org.example.reservacasarurales.DTOs.Response;
 
 import java.time.LocalDate;
 
+
 import lombok.Data;
 
 @Data
@@ -18,4 +19,5 @@ public class ReservaResponse {
 
     private Long casaId;
     private Long paqueteId;
+
 }

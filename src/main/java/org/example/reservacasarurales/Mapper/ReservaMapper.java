@@ -1,5 +1,6 @@
 package org.example.reservacasarurales.Mapper;
 
+
 import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
 import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
 import org.example.reservacasarurales.Entity.CasaRural;
@@ -45,3 +46,4 @@ public class ReservaMapper {
         return res;
     }
 }
+
