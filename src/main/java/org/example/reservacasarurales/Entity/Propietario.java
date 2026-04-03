@@ -22,20 +22,15 @@ public class Propietario {
     @Column(name = "nombre_propietario",nullable = false, length = 100)
     private String nombre;
 
-    @Column(name = "usuario",nullable = false, unique = true, length = 50)
-    private String usuario;
-
-    @Column(name = "contraseña",nullable = false)
-    private String password;
-
-    @Column(name = "correo_electronico", nullable = false, unique = true, length = 100)
-    private String correoElectronico;
-
-    @Column(name = "telefono_contacto", length = 20)
-    private String telefonoContacto;
-
     @Column(name = "numero_cuenta", length = 30)
     private String numeroCuenta;
+
+    @Column(name = "banco", length = 50)
+    private String banco;
+
+    @OneToOne
+    @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
+    private Usuario usuario;
 
     @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CasaRural> casas = new ArrayList<>();

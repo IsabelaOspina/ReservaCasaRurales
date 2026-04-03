@@ -2,16 +2,15 @@ package org.example.reservacasarurales.Service;
 
 import org.example.reservacasarurales.DTOs.Request.CasaRuralRequest;
 import org.example.reservacasarurales.DTOs.Response.CasaRuralResponse;
-import org.example.reservacasarurales.Entity.CasaRural;
-import org.example.reservacasarurales.Entity.Foto;
-import org.example.reservacasarurales.Entity.Propietario;
-import org.example.reservacasarurales.Entity.TipoCama;
-import org.example.reservacasarurales.Entity.Dormitorio;
+import org.example.reservacasarurales.Entity.*;
 import org.example.reservacasarurales.Mapper.CasaRuralMapper;
 import org.example.reservacasarurales.Repository.CasaRuralRepository;
 import org.example.reservacasarurales.Repository.DormitorioRepository;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,8 +29,17 @@ public class CasaRuralService {
     private DormitorioRepository dormitorioRepository;
 
     //HU003
-    public CasaRuralResponse registrarCasaRural(CasaRuralRequest casaRuralRequest, Long idPropietario) {
-        Propietario propietario = propietarioRepository.findByIdPropietario(idPropietario)
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public CasaRuralResponse registrarCasaRural(CasaRuralRequest casaRuralRequest) {
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
                 .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
 
         if (casaRuralRequest.getNumeroCocinas() < 1) {

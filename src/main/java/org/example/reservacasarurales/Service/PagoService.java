@@ -7,11 +7,16 @@ import org.example.reservacasarurales.DTOs.Request.PagoRequest;
 import org.example.reservacasarurales.DTOs.Response.PagoInfoResponse;
 import org.example.reservacasarurales.DTOs.Response.PagoResponse;
 import org.example.reservacasarurales.Entity.Pago;
+import org.example.reservacasarurales.Entity.Propietario;
 import org.example.reservacasarurales.Entity.Reserva;
 import org.example.reservacasarurales.Mapper.PagoMapper;
 import org.example.reservacasarurales.Repository.PagoRepository;
+import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.example.reservacasarurales.Repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,10 +31,33 @@ public class PagoService {
     @Autowired
     private PagoMapper mapper;
 
+    @Autowired
+    private PropietarioRepository propietarioRepository;
+
+
+    //HU007
+    @PreAuthorize("hasRole('PROPIETARIO')")
     public PagoResponse registrarPago(PagoRequest request) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String correo = authentication.getName();
+
+        // buscar propietario autenticado
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(correo)
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
 
         Reserva reserva = reservaRepository.findById(request.getReservaId())
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        // validar que la reserva pertenece a una casa del propietario
+        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
+                .equals(propietario.getIdPropietario())) {
+
+            throw new RuntimeException("No puedes registrar pagos de reservas de otras casas");
+        }
 
         if (LocalDate.now().isAfter(reserva.getFechaLimitePago())) {
             throw new RuntimeException("La reserva expiró");
@@ -40,12 +68,10 @@ public class PagoService {
 
         double totalPagado = calcularTotalPagado(reserva.getId());
 
-    
         if (totalPagado == 0 && request.getMonto() < anticipoMinimo) {
-            throw new RuntimeException("Debe pagar al menos el 20% en el primer pago");
+            throw new RuntimeException("Debe registrar al menos el 20% en el primer pago");
         }
 
-    
         if (totalPagado + request.getMonto() > total) {
             throw new RuntimeException("El pago excede el total de la reserva");
         }
@@ -53,12 +79,10 @@ public class PagoService {
         Pago pago = mapper.toEntity(request, reserva);
         pago.setConfirmado(true);
 
-    
         if (totalPagado + request.getMonto() >= anticipoMinimo) {
             reserva.setConfirmada(true);
         }
 
-        
         if (totalPagado + request.getMonto() == total) {
             System.out.println("RESERVA PAGADA COMPLETAMENTE");
         }
@@ -81,10 +105,28 @@ public class PagoService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('PROPIETARIO')")
     public PagoInfoResponse obtenerInfoPago(Long reservaId) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String correo = authentication.getName();
+
+        // propietario autenticado
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(correo)
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
 
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        // validar que la reserva pertenece a una casa del propietario
+        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
+                .equals(propietario.getIdPropietario())) {
+
+            throw new RuntimeException("No tienes permiso para ver esta reserva");
+        }
 
         double total = reserva.getPaquete().getPrecio() * reserva.getNoches();
         double pagado = calcularTotalPagado(reservaId);
@@ -94,8 +136,10 @@ public class PagoService {
         response.setTotal(total);
         response.setAnticipo(total * 0.2);
         response.setRestante(restante);
-        response.setNumeroCuenta("123-456-789");
-        response.setBanco("Bancolombia");
+
+        // datos del propietario
+        response.setNumeroCuenta(propietario.getNumeroCuenta());
+        response.setBanco(propietario.getBanco());
 
         return response;
     }

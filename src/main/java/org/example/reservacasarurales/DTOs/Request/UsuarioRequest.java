@@ -3,11 +3,8 @@ package org.example.reservacasarurales.DTOs.Request;
 import lombok.Data;
 
 @Data
-public class ClienteRequest {
+public class UsuarioRequest {
     private String username;
     private String password;
-    private String nombre;
     private String correoElectronico;
-    private String telefonoContacto;
-
 }

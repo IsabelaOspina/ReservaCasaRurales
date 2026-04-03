@@ -23,7 +23,7 @@ public class CasaRuralController {
             @PathVariable Long propietarioId,
             @RequestBody CasaRuralRequest request) {
         try {
-            CasaRuralResponse response = casaRuralService.registrarCasaRural(request, propietarioId);
+            CasaRuralResponse response = casaRuralService.registrarCasaRural(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             // Error de validación → 400

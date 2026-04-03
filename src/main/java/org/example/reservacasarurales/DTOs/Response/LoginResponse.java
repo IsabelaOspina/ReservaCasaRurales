@@ -1,16 +1,11 @@
 package org.example.reservacasarurales.DTOs.Response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class LoginResponse {
-    private String token; // JWT
-
-    public LoginResponse(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
+    private String token;
+    
 }

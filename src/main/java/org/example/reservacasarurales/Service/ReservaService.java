@@ -8,16 +8,13 @@ import org.example.reservacasarurales.DTOs.Request.DisponibilidadRequest;
 import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
 import org.example.reservacasarurales.DTOs.Response.DisponibilidadResponse;
 import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
-import org.example.reservacasarurales.Entity.CasaRural;
-import org.example.reservacasarurales.Entity.Dormitorio;
-import org.example.reservacasarurales.Entity.PaqueteAlquiler;
-import org.example.reservacasarurales.Entity.Reserva;
+import org.example.reservacasarurales.Entity.*;
 import org.example.reservacasarurales.Mapper.ReservaMapper;
-import org.example.reservacasarurales.Repository.CasaRuralRepository;
-import org.example.reservacasarurales.Repository.DormitorioRepository;
-import org.example.reservacasarurales.Repository.PaqueteRepository;
-import org.example.reservacasarurales.Repository.ReservaRepository;
+import org.example.reservacasarurales.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
@@ -40,10 +37,24 @@ public class ReservaService {
     @Autowired
     private ReservaMapper mapper;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     
     // CREAR RESERVA (HU013, HU014, HU017)
-    
+
+    @PreAuthorize("hasRole('CLIENTE')")
     public ReservaResponse crearReserva(ReservaRequest request) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String correo = authentication.getName();
+
+        // cliente autenticado
+        Cliente cliente = clienteRepository
+                .findByUsuarioCorreoElectronico(correo)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
         CasaRural casa = casaRepository.findById(request.getCasaId())
                 .orElseThrow(() -> new RuntimeException("Casa no encontrada"));
@@ -54,11 +65,11 @@ public class ReservaService {
         LocalDate fechaInicio = request.getFechaInicio();
         LocalDate fechaFin = fechaInicio.plusDays(request.getNoches());
 
-        // Validar disponibilidad general
+        // validar disponibilidad
         validarDisponibilidadCasa(request.getCasaId(), fechaInicio, fechaFin);
 
-        // Validar dormitorios (HU014)
         if (request.getDormitoriosIds() != null && !request.getDormitoriosIds().isEmpty()) {
+
             validarDisponibilidadDormitorios(
                     request.getDormitoriosIds(),
                     fechaInicio,
@@ -68,9 +79,13 @@ public class ReservaService {
 
         Reserva reserva = mapper.toEntity(request, casa, paquete);
 
-        
+        // asignar cliente autenticado
+        reserva.setCliente(cliente);
+
         if (request.getDormitoriosIds() != null && !request.getDormitoriosIds().isEmpty()) {
-            List<Dormitorio> dormitorios = dormitorioRepository.findAllById(request.getDormitoriosIds());
+
+            List<Dormitorio> dormitorios =
+                    dormitorioRepository.findAllById(request.getDormitoriosIds());
 
             if (dormitorios.size() != request.getDormitoriosIds().size()) {
                 throw new RuntimeException("Uno o más dormitorios no existen");
@@ -79,19 +94,19 @@ public class ReservaService {
             reserva.setDormitorios(dormitorios);
         }
 
-        
         reserva.setFechaInicio(fechaInicio);
         reserva.setFechaFin(fechaFin);
         reserva.setConfirmada(false);
         reserva.setFechaCreacion(LocalDate.now());
-        reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); // HU017
+        reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); //HU017
 
         return mapper.toResponse(reservaRepository.save(reserva));
     }
 
     
     // DISPONIBILIDAD (HU020)
-    
+
+
     public DisponibilidadResponse verificarDisponibilidad(DisponibilidadRequest request) {
 
         CasaRural casa = casaRepository.findById(request.getCasaId())
