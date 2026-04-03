@@ -9,6 +9,6 @@ import java.time.LocalDate;
 public class PaqueteAlquilerRequest {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
-    private double precio;
+    private Double precio;
     private TipoAlquiler tipoAlquiler;
 }

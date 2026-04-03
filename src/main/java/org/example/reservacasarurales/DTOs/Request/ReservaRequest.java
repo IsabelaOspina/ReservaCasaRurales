@@ -8,7 +8,6 @@ import lombok.Data;
 
 @Data
 public class ReservaRequest {
-
     private LocalDate fechaInicio;
     private int noches;
     private Long casaId;
