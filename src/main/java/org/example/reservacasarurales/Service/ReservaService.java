@@ -81,6 +81,13 @@ public class ReservaService {
 
         // asignar cliente autenticado
         reserva.setCliente(cliente);
+        // asignar teléfono (HU15)
+        if (request.getTelefonoContacto() != null) {
+            reserva.setTelefonoContacto(request.getTelefonoContacto());
+        } else {
+            reserva.setTelefonoContacto(cliente.getTelefonoContacto());
+        }
+
 
         if (request.getDormitoriosIds() != null && !request.getDormitoriosIds().isEmpty()) {
 

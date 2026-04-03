@@ -34,8 +34,8 @@ public class Reserva {
     @Column(name = "fecha_limite_pago")
     private LocalDate fechaLimitePago;
 
-    @Column(name = "telefono", length = 20)
-    private String telefono;
+    @Column(name = "telefono_contacto")
+    private String telefonoContacto;
 
     @ManyToOne
     @JoinColumn(name = "id_casa")

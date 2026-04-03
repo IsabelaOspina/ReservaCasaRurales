@@ -13,5 +13,5 @@ public class ReservaRequest {
     private Long casaId;
     private Long paqueteId;
     private List<Long> dormitoriosIds;
+    private String telefonoContacto;
 }
-
