@@ -26,6 +26,9 @@ public class Cliente {
     @Column(name = "telefono_contacto")
     private String telefonoContacto;
 
+    @Column(nullable = false)
+    private String email;
+
     @OneToOne
     @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
     private Usuario usuario;

@@ -33,7 +33,7 @@ public class PagoController {
     }
 
     @GetMapping("/{reservaId}")
-    public List<PagoResponse> obtenerPagos(@PathVariable Long reservaId) {
-        return pagoService.obtenerPagosPorReserva(reservaId);
+    public ResponseEntity<List<PagoResponse>> obtenerPagos(@PathVariable Long reservaId) {
+        return ResponseEntity.ok(pagoService.obtenerPagosPorReserva(reservaId));
     }
 }
