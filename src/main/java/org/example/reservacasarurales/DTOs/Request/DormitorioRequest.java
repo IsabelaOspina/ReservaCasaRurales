@@ -6,6 +6,7 @@ import org.example.reservacasarurales.Entity.TipoCama;
 @Data
 public class DormitorioRequest {
     private int numeroCamas;
+    private String nombre;
     private TipoCama tipoCama;
     private boolean tieneBano;
 }

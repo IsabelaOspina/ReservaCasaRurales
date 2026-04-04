@@ -9,6 +9,7 @@ import org.example.reservacasarurales.DTOs.Response.PagoResponse;
 import org.example.reservacasarurales.Entity.Pago;
 import org.example.reservacasarurales.Entity.Propietario;
 import org.example.reservacasarurales.Entity.Reserva;
+import org.example.reservacasarurales.Entity.Usuario;
 import org.example.reservacasarurales.Mapper.PagoMapper;
 import org.example.reservacasarurales.Repository.PagoRepository;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
@@ -111,9 +112,10 @@ public class PagoService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        String correo = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        // propietario autenticado
+        String correo = usuario.getCorreoElectronico();
+
         Propietario propietario = propietarioRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));

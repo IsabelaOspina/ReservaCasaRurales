@@ -5,6 +5,7 @@ import org.example.reservacasarurales.DTOs.Response.CocinaResponse;
 import org.example.reservacasarurales.Entity.CasaRural;
 import org.example.reservacasarurales.Entity.Cocina;
 import org.example.reservacasarurales.Entity.Propietario;
+import org.example.reservacasarurales.Entity.Usuario;
 import org.example.reservacasarurales.Exception.MaxCocinasException;
 import org.example.reservacasarurales.Mapper.CocinaMapper;
 import org.example.reservacasarurales.Repository.CasaRuralRepository;
@@ -40,9 +41,10 @@ public class CocinaService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        String correo = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        // buscar propietario por correo
+        String correo = usuario.getCorreoElectronico();
+
         Propietario propietario = propietarioRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));

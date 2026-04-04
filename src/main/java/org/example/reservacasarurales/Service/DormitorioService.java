@@ -5,6 +5,7 @@ import org.example.reservacasarurales.DTOs.Response.DormitorioResponse;
 import org.example.reservacasarurales.Entity.CasaRural;
 import org.example.reservacasarurales.Entity.Dormitorio;
 import org.example.reservacasarurales.Entity.Propietario;
+import org.example.reservacasarurales.Entity.Usuario;
 import org.example.reservacasarurales.Exception.MaxDormitoriosException;
 import org.example.reservacasarurales.Mapper.DormitorioMapper;
 import org.example.reservacasarurales.Repository.CasaRuralRepository;
@@ -37,13 +38,15 @@ public class DormitorioService {
     @PreAuthorize("hasRole('PROPIETARIO')")
     public DormitorioResponse registrarDormitorio(Long codigoCasa, DormitorioRequest request) {
 
-        // obtener usuario autenticado
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        String correo = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        // buscar propietario por correo
+        String correo = usuario.getCorreoElectronico();
+
+        System.out.println("Correo autenticado: " + correo);
+
         Propietario propietario = propietarioRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));

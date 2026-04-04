@@ -64,16 +64,6 @@ public class CasaRuralService {
 
         CasaRural saved = casaRuralRepository.save(casa);
 
-        
-        for (int i = 1; i <= casaRuralRequest.getNumeroDormitorios(); i++) {
-            Dormitorio dormitorio = new Dormitorio();
-            dormitorio.setCasaRural(saved);
-            dormitorio.setNombre("Habitación " + i);
-            dormitorio.setTipoCama(TipoCama.SENCILLA);
-
-            dormitorioRepository.save(dormitorio);
-        }
-
         return casaRuralMapper.toResponse(saved);
     }
 

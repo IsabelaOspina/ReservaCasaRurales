@@ -49,9 +49,12 @@ public class ReservaService {
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        String correo = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        // cliente autenticado
+        String correo = usuario.getCorreoElectronico();
+
+        System.out.println("Correo autenticado: " + correo);
+
         Cliente cliente = clienteRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
@@ -81,6 +84,7 @@ public class ReservaService {
 
         // asignar cliente autenticado
         reserva.setCliente(cliente);
+
         // asignar teléfono (HU15)
         if (request.getTelefonoContacto() != null) {
             reserva.setTelefonoContacto(request.getTelefonoContacto());
