@@ -6,11 +6,13 @@ import java.util.List;
 import org.example.reservacasarurales.DTOs.Request.PagoRequest;
 import org.example.reservacasarurales.DTOs.Response.PagoInfoResponse;
 import org.example.reservacasarurales.DTOs.Response.PagoResponse;
+import org.example.reservacasarurales.Entity.Cliente;
 import org.example.reservacasarurales.Entity.Pago;
 import org.example.reservacasarurales.Entity.Propietario;
 import org.example.reservacasarurales.Entity.Reserva;
 import org.example.reservacasarurales.Entity.Usuario;
 import org.example.reservacasarurales.Mapper.PagoMapper;
+import org.example.reservacasarurales.Repository.ClienteRepository;
 import org.example.reservacasarurales.Repository.PagoRepository;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.example.reservacasarurales.Repository.ReservaRepository;
@@ -35,29 +37,31 @@ public class PagoService {
     @Autowired
     private PropietarioRepository propietarioRepository;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
 
     //HU007
-    @PreAuthorize("hasRole('PROPIETARIO')")
+    @PreAuthorize("hasRole('CLIENTE')")
     public PagoResponse registrarPago(PagoRequest request) {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().getAuthentication();
 
-        String correo = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-        // buscar propietario autenticado
-        Propietario propietario = propietarioRepository
+        String correo = usuario.getCorreoElectronico();
+
+        Cliente cliente = clienteRepository
                 .findByUsuarioCorreoElectronico(correo)
-                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
         Reserva reserva = reservaRepository.findById(request.getReservaId())
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        // validar que la reserva pertenece a una casa del propietario
-        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
-                .equals(propietario.getIdPropietario())) {
-
-            throw new RuntimeException("No puedes registrar pagos de reservas de otras casas");
+        
+        if (!reserva.getCliente().getIdCliente().equals(cliente.getIdCliente())) {
+            throw new RuntimeException("No tienes permiso para pagar esta reserva");
         }
 
         if (LocalDate.now().isAfter(reserva.getFechaLimitePago())) {
@@ -110,23 +114,23 @@ public class PagoService {
     public PagoInfoResponse obtenerInfoPago(Long reservaId) {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().getAuthentication();
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         String correo = usuario.getCorreoElectronico();
 
-        Propietario propietario = propietarioRepository
+        
+        Cliente cliente = clienteRepository
                 .findByUsuarioCorreoElectronico(correo)
-                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
 
+        
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        // validar que la reserva pertenece a una casa del propietario
-        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
-                .equals(propietario.getIdPropietario())) {
-
+        
+        if (!reserva.getCliente().getIdCliente().equals(cliente.getIdCliente())) {
             throw new RuntimeException("No tienes permiso para ver esta reserva");
         }
 
@@ -138,6 +142,9 @@ public class PagoService {
         response.setTotal(total);
         response.setAnticipo(total * 0.2);
         response.setRestante(restante);
+
+        // obtener propietario desde la reserva
+        Propietario propietario = reserva.getCasaRural().getPropietario();
 
         // datos del propietario
         response.setNumeroCuenta(propietario.getNumeroCuenta());

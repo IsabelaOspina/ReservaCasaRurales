@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "paquetes_alquiler")
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class PaqueteAlquiler {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_paquete")
@@ -31,8 +33,10 @@ public class PaqueteAlquiler {
     @Column(name = "tipo_alquiler", nullable = false)
     private TipoAlquiler tipoAlquiler;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "id_casa", nullable = false)
     private CasaRural casaRural;
 
+    @OneToMany(mappedBy = "paquete")
+    private List<Reserva> reservas;
 }

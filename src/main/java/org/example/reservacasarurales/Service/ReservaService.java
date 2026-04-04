@@ -47,14 +47,14 @@ public class ReservaService {
     public ReservaResponse crearReserva(ReservaRequest request) {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().getAuthentication();
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         String correo = usuario.getCorreoElectronico();
 
         System.out.println("Correo autenticado: " + correo);
-
+        
         Cliente cliente = clienteRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
@@ -110,6 +110,8 @@ public class ReservaService {
         reserva.setConfirmada(false);
         reserva.setFechaCreacion(LocalDate.now());
         reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); //HU017
+
+        reserva.setEstado(EstadoReserva.PENDIENTE);
 
         return mapper.toResponse(reservaRepository.save(reserva));
     }

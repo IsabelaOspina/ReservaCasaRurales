@@ -19,7 +19,6 @@ public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_reserva")
-
     private Long id;
 
     @Column(name = "fecha_inicio", nullable = false)
@@ -37,12 +36,14 @@ public class Reserva {
     @Column(name = "telefono_contacto")
     private String telefonoContacto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_casa")
+    
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_casa", nullable = false)
     private CasaRural casaRural;
 
-    @ManyToOne
-    @JoinColumn(name = "id_paquete")
+    
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_paquete", nullable = false)
     private PaqueteAlquiler paquete;
 
     @ManyToMany
@@ -52,26 +53,21 @@ public class Reserva {
         inverseJoinColumns = @JoinColumn(name = "id_dormitorio")
     )
     private List<Dormitorio> dormitorios;
-    
+
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDate fechaCreacion;
-    
+
     @Column(name = "fecha_fin", nullable = false)
     private LocalDate fechaFin;
-
 
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<Pago> pagos;
 
-
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoReserva estado;
-
-
-
 }
