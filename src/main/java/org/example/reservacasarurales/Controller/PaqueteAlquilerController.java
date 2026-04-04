@@ -8,9 +8,7 @@ import org.example.reservacasarurales.Service.PaqueteAlquilerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/paquetes")
@@ -49,19 +47,5 @@ public class PaqueteAlquilerController {
         return ResponseEntity.ok(
                 paqueteService.listarPaquetesPorCasa(codigoCasa)
         );
-    }
-
-    @PostMapping("/{idPaquete}/dividir")
-    public ResponseEntity<?> dividirPaquete(
-            @PathVariable Long idPaquete,
-            @RequestBody Map<String, LocalDate> fechas) {
-        try {
-            LocalDate nuevaFechaInicio = fechas.get("fechaInicio");
-            LocalDate nuevaFechaFin = fechas.get("fechaFin");
-            List<PaqueteAlquilerResponse> nuevosPaquetes = paqueteService.dividirPaquete(idPaquete, nuevaFechaInicio, nuevaFechaFin);
-            return ResponseEntity.ok(nuevosPaquetes);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
     }
 }

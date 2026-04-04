@@ -7,11 +7,10 @@ import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
 import org.example.reservacasarurales.Service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/reservas")
@@ -30,26 +29,5 @@ public class ReservaController {
             @RequestBody DisponibilidadRequest request) {
 
         return ResponseEntity.ok(reservaService.verificarDisponibilidad(request));
-    }
-
-    // - Listar reservas pendientes con días transcurridos
-    @GetMapping("/pendientes")
-    public ResponseEntity<?> listarReservasPendientes() {
-        return ResponseEntity.ok(reservaService.listarReservasPendientes());
-    }
-
-    // HU23 - Listar reservas expiradas (plazo 3 días vencido)
-    @GetMapping("/expiradas")
-    public ResponseEntity<List<ReservaResponse>> listarReservasExpiradas() {
-        return ResponseEntity.ok(reservaService.listarReservasExpiradas());
-    }
-
-    // HU20/HU28 - Calendario de disponibilidad
-    @GetMapping("/calendario/{casaId}")
-    public ResponseEntity<Map<LocalDate, String>> obtenerCalendario(
-            @PathVariable Long casaId,
-            @RequestParam LocalDate desde,
-            @RequestParam LocalDate hasta) {
-        return ResponseEntity.ok(reservaService.obtenerCalendario(casaId, desde, hasta));
     }
 }

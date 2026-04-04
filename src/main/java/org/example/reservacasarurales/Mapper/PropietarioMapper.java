@@ -12,8 +12,6 @@ public interface PropietarioMapper {
     @Mapping(target = "idPropietario", ignore = true)
     @Mapping(target = "usuario", ignore = true)
     @Mapping(target = "casas", ignore = true)
-    @Mapping(target = "correoElectronico", source = "correoElectronico")
-    @Mapping(target = "password", source = "password")
     Propietario toEntity(PropietarioRequest request);
 
     @Mapping(target = "idUsuario", source = "usuario.idUsuario")

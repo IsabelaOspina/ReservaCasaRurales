@@ -16,13 +16,7 @@ import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import org.example.reservacasarurales.Repository.ReservaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.util.ArrayList;
 
 import java.util.List;
 
@@ -30,15 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaqueteAlquilerService {
 
-    @Autowired
-    private ReservaRepository reservaRepository;
-
-    @Autowired
-    private PropietarioRepository propietarioRepository;
-
     private final PaqueteRepository paqueteRepository;
     private final CasaRuralRepository casaRepository;
     private final PaqueteMapper paqueteMapper;
+    private final PropietarioRepository propietarioRepository;
 
     // CREAR PAQUETE
     @PreAuthorize("hasRole('PROPIETARIO')")
@@ -64,17 +53,6 @@ public class PaqueteAlquilerService {
 
         CasaRural casa = casaRepository.findByCodigoCasa(codigoCasa)
                 .orElseThrow(() -> new RuntimeException("Casa no encontrada"));
-
-        //  Validar que las fechas no coincidan con otro paquete
-        boolean hayConflicto = paqueteRepository.findByCasaRural_CodigoCasa(codigoCasa)
-                .stream()
-                .anyMatch(p -> !(request.getFechaFin().isBefore(p.getFechaInicio()) ||
-                        request.getFechaInicio().isAfter(p.getFechaFin())));
-
-        if (hayConflicto) {
-            throw new RuntimeException("Las fechas coinciden con otro paquete existente en esta casa");
-        }
-
 
         // Mapear
         PaqueteAlquiler paquete = paqueteMapper.toEntity(request);
@@ -128,55 +106,5 @@ public class PaqueteAlquilerService {
         return paquetes.stream()
                 .map(paqueteMapper::toResponse)
                 .toList();
-    }
-
-    @PreAuthorize("hasRole('PROPIETARIO')")
-    public List<PaqueteAlquilerResponse> dividirPaquete(Long idPaquete, LocalDate nuevaFechaInicio, LocalDate nuevaFechaFin) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Usuario usuario = (Usuario) auth.getPrincipal();
-
-        Propietario propietario = propietarioRepository
-                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
-                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
-
-        PaqueteAlquiler paqueteOriginal = paqueteRepository.findById(idPaquete)
-                .orElseThrow(() -> new RuntimeException("Paquete no encontrado"));
-
-        if (!paqueteOriginal.getCasaRural().getPropietario().getIdPropietario().equals(propietario.getIdPropietario())) {
-            throw new RuntimeException("No tienes permiso para dividir este paquete");
-        }
-
-        // Validar que no tenga reservas
-        boolean tieneReservas = reservaRepository.findAll().stream()
-                .anyMatch(r -> r.getPaquete() != null && r.getPaquete().getIdPaquete().equals(idPaquete));
-
-        if (tieneReservas) {
-            throw new RuntimeException("No se puede dividir un paquete que tiene reservas asociadas");
-        }
-
-        // Crear primer paquete
-        PaqueteAlquiler paquete1 = new PaqueteAlquiler();
-        paquete1.setFechaInicio(paqueteOriginal.getFechaInicio());
-        paquete1.setFechaFin(nuevaFechaInicio.minusDays(1));
-        paquete1.setPrecio(paqueteOriginal.getPrecio());
-        paquete1.setTipoAlquiler(paqueteOriginal.getTipoAlquiler());
-        paquete1.setCasaRural(paqueteOriginal.getCasaRural());
-
-        // Crear segundo paquete
-        PaqueteAlquiler paquete2 = new PaqueteAlquiler();
-        paquete2.setFechaInicio(nuevaFechaInicio);
-        paquete2.setFechaFin(nuevaFechaFin);
-        paquete2.setPrecio(paqueteOriginal.getPrecio());
-        paquete2.setTipoAlquiler(paqueteOriginal.getTipoAlquiler());
-        paquete2.setCasaRural(paqueteOriginal.getCasaRural());
-
-        // Eliminar original y guardar nuevos
-        paqueteRepository.delete(paqueteOriginal);
-
-        List<PaqueteAlquilerResponse> nuevosPaquetes = new ArrayList<>();
-        nuevosPaquetes.add(paqueteMapper.toResponse(paqueteRepository.save(paquete1)));
-        nuevosPaquetes.add(paqueteMapper.toResponse(paqueteRepository.save(paquete2)));
-
-        return nuevosPaquetes;
     }
 }

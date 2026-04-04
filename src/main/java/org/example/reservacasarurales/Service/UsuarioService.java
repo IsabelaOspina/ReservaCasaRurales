@@ -58,9 +58,6 @@ public class UsuarioService {
 
         Cliente cliente = clienteMapper.toEntity(clienteDTO);
         cliente.setUsuario(usuario);
-        cliente.setNombre(clienteDTO.getNombre());
-        cliente.setEmail(clienteDTO.getCorreoElectronico());
-
 
         clienteRepository.save(cliente);
     }
@@ -78,13 +75,7 @@ public class UsuarioService {
 
         Propietario propietario = propietarioMapper.toEntity(propietarioDTO);
         propietario.setUsuario(usuario);
-        propietario.setCorreoElectronico(propietarioDTO.getCorreoElectronico());
-        propietario.setPassword(propietarioDTO.getPassword());
-        propietario.setUsername(propietarioDTO.getUsername());
+        
         propietarioRepository.save(propietario);
-
-
     }
-
-
 }
