@@ -32,6 +32,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/usuario/**").permitAll()
 
+
+                        .requestMatchers("/uploads/**").permitAll()
+
                         .requestMatchers("/cliente/**")
                         .hasRole("CLIENTE")
 
@@ -40,6 +43,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/casas/**")
                         .hasAnyRole("CLIENTE","PROPIETARIO")
+
+
 
                         .anyRequest()
                         .authenticated()

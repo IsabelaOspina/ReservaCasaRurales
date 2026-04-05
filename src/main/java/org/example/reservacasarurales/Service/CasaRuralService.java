@@ -5,14 +5,20 @@ import org.example.reservacasarurales.DTOs.Response.CasaRuralResponse;
 import org.example.reservacasarurales.Entity.*;
 import org.example.reservacasarurales.Mapper.CasaRuralMapper;
 import org.example.reservacasarurales.Repository.CasaRuralRepository;
-import org.example.reservacasarurales.Repository.DormitorioRepository;
+import org.example.reservacasarurales.Repository.FotoRepository;
 import org.example.reservacasarurales.Repository.PropietarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 @Service
 public class CasaRuralService {
 
@@ -23,14 +29,14 @@ public class CasaRuralService {
     private PropietarioRepository propietarioRepository;
 
     @Autowired
-    private CasaRuralMapper casaRuralMapper;
+    private FotoRepository fotoRepository;
 
     @Autowired
-    private DormitorioRepository dormitorioRepository;
+    private CasaRuralMapper casaRuralMapper;
 
     //HU003
     @PreAuthorize("hasRole('PROPIETARIO')")
-    public CasaRuralResponse registrarCasaRural(CasaRuralRequest casaRuralRequest) {
+    public CasaRuralResponse registrarCasaRural(CasaRuralRequest casaRuralRequest) throws IOException {
 
         Authentication authentication = SecurityContextHolder
                 .getContext()
@@ -54,17 +60,47 @@ public class CasaRuralService {
 
         CasaRural casa = casaRuralMapper.toEntity(casaRuralRequest);
 
+        if (casa.getFotos() == null) {
+            casa.setFotos(new ArrayList<>());
+        }
+
         casa.setPropietario(propietario);
 
-        if (casa.getFotos() != null) {
-            for (Foto foto : casa.getFotos()) {
-                foto.setCasaRural(casa);
+        CasaRural savedCasa = casaRuralRepository.save(casa);
+
+        String rutaUpload = "uploads/";
+
+        if (casaRuralRequest.getFotos() != null) {
+
+            for (int i = 0; i < casaRuralRequest.getFotos().size(); i++) {
+
+                MultipartFile archivo = casaRuralRequest.getFotos().get(i);
+
+                String nombreArchivo = System.currentTimeMillis() + "_" + archivo.getOriginalFilename();
+
+                Path ruta = Paths.get(rutaUpload + nombreArchivo);
+
+                Files.createDirectories(ruta.getParent());
+                Files.write(ruta, archivo.getBytes());
+
+                Foto foto = new Foto();
+                foto.setUrl("/uploads/" + nombreArchivo);
+
+                if (casaRuralRequest.getDescripcionesFotos() != null &&
+                        i < casaRuralRequest.getDescripcionesFotos().size()) {
+
+                    foto.setDescripcion(casaRuralRequest.getDescripcionesFotos().get(i));
+                }
+
+                foto.setCasaRural(savedCasa);
+
+                fotoRepository.save(foto);
+
+                savedCasa.getFotos().add(foto);
             }
         }
 
-        CasaRural saved = casaRuralRepository.save(casa);
-
-        return casaRuralMapper.toResponse(saved);
+        return casaRuralMapper.toResponse(savedCasa);
     }
 
 }
