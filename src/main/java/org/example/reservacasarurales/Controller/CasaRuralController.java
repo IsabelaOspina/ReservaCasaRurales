@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,4 +42,30 @@ public class CasaRuralController {
             throw new RuntimeException(e);
         }
     }
+
+    @GetMapping("/{codigoCasa}")
+    public ResponseEntity<?> obtenerCasa(@PathVariable Long codigoCasa) {
+
+        try {
+
+            CasaRuralResponse response = casaRuralService.obtenerCasaPorId(codigoCasa);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/listar")
+    public ResponseEntity<List<CasaRuralResponse>> listarCasas() {
+
+        List<CasaRuralResponse> casas = casaRuralService.listarCasas();
+
+        return ResponseEntity.ok(casas);
+    }
+
+
 }

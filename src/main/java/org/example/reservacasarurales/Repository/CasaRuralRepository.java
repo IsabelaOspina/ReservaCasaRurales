@@ -13,5 +13,6 @@ public interface CasaRuralRepository extends JpaRepository<CasaRural, Long> {
     List<Long> findCodigosByPoblacion(String poblacion);
 
     Optional<CasaRural> findByCodigoCasa(Long codigoCasa);
+
 }
 

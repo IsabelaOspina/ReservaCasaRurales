@@ -103,4 +103,22 @@ public class CasaRuralService {
         return casaRuralMapper.toResponse(savedCasa);
     }
 
+    public CasaRuralResponse obtenerCasaPorId(Long codigoCasa) {
+
+        CasaRural casa = casaRuralRepository.findByCodigoCasa(codigoCasa)
+                .orElseThrow(() -> new RuntimeException("Casa rural no encontrada"));
+
+        return casaRuralMapper.toResponse(casa);
+    }
+
+    public List<CasaRuralResponse> listarCasas() {
+
+        return casaRuralRepository.findAll()
+                .stream()
+                .map(casaRuralMapper::toResponse)
+                .toList();
+    }
+
+
+
 }
