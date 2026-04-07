@@ -68,6 +68,15 @@ public class ReservaService {
         LocalDate fechaInicio = request.getFechaInicio();
         LocalDate fechaFin = fechaInicio.plusDays(request.getNoches());
 
+        // VALIDAR VIGENCIA DEL PAQUETE
+        if (fechaInicio.isBefore(paquete.getFechaInicio()) ||
+                fechaFin.isAfter(paquete.getFechaFin())) {
+
+            throw new RuntimeException(
+                    "La reserva está fuera del rango de vigencia del paquete de alquiler"
+            );
+        }
+
         // validar disponibilidad
         validarDisponibilidadCasa(request.getCasaId(), fechaInicio, fechaFin);
 
