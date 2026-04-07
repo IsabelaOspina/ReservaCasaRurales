@@ -8,6 +8,7 @@ import lombok.Data;
 public class DisponibilidadRequest {
 
     private Long casaId;
+    private Long paqueteId;
     private LocalDate fechaInicio;
     private int noches;
 }

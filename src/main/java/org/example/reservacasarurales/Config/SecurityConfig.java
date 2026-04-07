@@ -52,7 +52,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/*/cocinas/listar")
                         .hasAnyRole("CLIENTE","PROPIETARIO")
-                        
+
                         .requestMatchers("/*/dormitorios/registrar")
                         .hasRole("PROPIETARIO")
 

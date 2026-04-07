@@ -127,8 +127,6 @@ public class ReservaService {
 
     
     // DISPONIBILIDAD (HU020)
-
-
     public DisponibilidadResponse verificarDisponibilidad(DisponibilidadRequest request) {
 
         CasaRural casa = casaRepository.findById(request.getCasaId())
@@ -136,6 +134,19 @@ public class ReservaService {
 
         LocalDate inicio = request.getFechaInicio();
         LocalDate fin = inicio.plusDays(request.getNoches());
+
+        PaqueteAlquiler paquete = paqueteRepository.findById(request.getPaqueteId())
+                .orElseThrow(() -> new RuntimeException("Paquete no encontrado"));
+
+        // VALIDAR VIGENCIA DEL PAQUETE
+        if (inicio.isBefore(paquete.getFechaInicio()) ||
+                fin.isAfter(paquete.getFechaFin())) {
+
+            return new DisponibilidadResponse(
+                    false,
+                    "El paquete de alquiler no está vigente para esas fechas"
+            );
+        }
 
         List<Reserva> conflictos = reservaRepository.buscarReservasEnConflicto(
                 request.getCasaId(),
@@ -149,6 +160,7 @@ public class ReservaService {
                 disponible,
                 disponible ? "Disponible" : "No disponible en esas fechas"
         );
+
     }
 
     
