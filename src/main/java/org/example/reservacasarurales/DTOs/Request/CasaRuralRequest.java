@@ -16,6 +16,4 @@ public class CasaRuralRequest {
     private int plazasGaraje;
     private List<MultipartFile> fotos;
     private List<String> descripcionesFotos;
-
-
 }
