@@ -110,7 +110,7 @@ public class PagoService {
                 .toList();
     }
 
-    @PreAuthorize("hasRole('PROPIETARIO')")
+    @PreAuthorize("hasRole('CLIENTE')")
     public PagoInfoResponse obtenerInfoPago(Long reservaId) {
 
         Authentication authentication =
