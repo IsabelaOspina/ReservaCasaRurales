@@ -102,6 +102,35 @@ public class CasaRuralService {
 
         return casaRuralMapper.toResponse(savedCasa);
     }
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public void eliminarCasa(Long codigoCasa){
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(
+                        usuario.getCorreoElectronico()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Propietario no encontrado"));
+
+
+        if(!casaRuralRepository
+                .existsByCodigoCasaAndPropietarioIdPropietario(
+                        codigoCasa,
+                        propietario.getIdPropietario()
+                )){
+            throw new RuntimeException(
+                    "No tienes permisos para eliminar esta casa o no existe"
+            );
+        }
+
+        casaRuralRepository.deleteById(codigoCasa);
+    }
 
     public CasaRuralResponse obtenerCasaPorId(Long codigoCasa) {
 

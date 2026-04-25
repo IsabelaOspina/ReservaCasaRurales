@@ -14,5 +14,11 @@ public interface CasaRuralRepository extends JpaRepository<CasaRural, Long> {
 
     Optional<CasaRural> findByCodigoCasa(Long codigoCasa);
 
+    boolean existsByCodigoCasaAndPropietarioIdPropietario(
+            Long codigoCasa,
+            Long idPropietario
+    );
+
+
 }
 

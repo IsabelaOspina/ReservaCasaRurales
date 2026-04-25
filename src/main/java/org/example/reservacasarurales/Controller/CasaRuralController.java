@@ -42,6 +42,32 @@ public class CasaRuralController {
             throw new RuntimeException(e);
         }
     }
+    @DeleteMapping("/{codigoCasa}")
+    public ResponseEntity<?> eliminarCasa(
+            @PathVariable Long codigoCasa){
+
+        try{
+
+            casaRuralService.eliminarCasa(codigoCasa);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "mensaje",
+                            "Casa rural eliminada correctamente"
+                    )
+            );
+
+        }catch(RuntimeException e){
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(
+                            Map.of(
+                                    "error",
+                                    e.getMessage()
+                            )
+                    );
+        }
+    }
 
     @GetMapping("/{codigoCasa}")
     public ResponseEntity<?> obtenerCasa(@PathVariable Long codigoCasa) {
@@ -66,6 +92,7 @@ public class CasaRuralController {
 
         return ResponseEntity.ok(casas);
     }
+
 
 
 }
