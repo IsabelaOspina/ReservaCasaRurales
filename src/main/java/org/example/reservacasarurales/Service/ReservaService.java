@@ -40,6 +40,12 @@ public class ReservaService {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private PropietarioRepository propietarioRepository;
+
+    @Autowired
+    private PagoService pagoService;
+
     
     // CREAR RESERVA (HU013, HU014, HU017)
 
@@ -202,5 +208,59 @@ public class ReservaService {
             }
         }
 
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public List<ReservaResponse> obtenerReservasPendientes() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        return reservaRepository.findPendientesByPropietario(propietario.getIdPropietario())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public ReservaResponse cancelarReserva(Long id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+
+        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
+                .equals(propietario.getIdPropietario())) {
+            throw new RuntimeException("No puedes cancelar esta reserva");
+        }
+
+
+        double total = reserva.getPaquete().getPrecio() * reserva.getNoches();
+        double anticipoMinimo = total * 0.2;
+        double totalPagado = pagoService.calcularTotalPagado(reserva.getId());
+
+        if (totalPagado >= anticipoMinimo) {
+            throw new RuntimeException("No se puede cancelar, ya se pagó el 20%");
+        }
+
+        
+        if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+            throw new RuntimeException("Solo se pueden cancelar reservas pendientes");
+        }
+
+        reserva.setEstado(EstadoReserva.CANCELADA);
+
+        return mapper.toResponse(reservaRepository.save(reserva));
     }
 }
