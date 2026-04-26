@@ -122,7 +122,6 @@ public class ReservaService {
 
         reserva.setFechaInicio(fechaInicio);
         reserva.setFechaFin(fechaFin);
-        reserva.setConfirmada(false);
         reserva.setFechaCreacion(LocalDate.now());
         reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); //HU017
 
@@ -262,5 +261,21 @@ public class ReservaService {
         reserva.setEstado(EstadoReserva.CANCELADA);
 
         return mapper.toResponse(reservaRepository.save(reserva));
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    public List<ReservaResponse> obtenerMisReservas() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Cliente cliente = clienteRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+        return reservaRepository.findByClienteIdCliente(cliente.getIdCliente())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 }

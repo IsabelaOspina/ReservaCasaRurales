@@ -27,9 +27,6 @@ public class Reserva {
     @Column(name = "noches", nullable = false)
     private int noches;
 
-    @Column(name = "confirmada")
-    private boolean confirmada;
-
     @Column(name = "fecha_limite_pago")
     private LocalDate fechaLimitePago;
 

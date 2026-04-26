@@ -43,4 +43,10 @@ public class ReservaController {
     public ResponseEntity<ReservaResponse> cancelar(@PathVariable Long id) {
         return ResponseEntity.ok(reservaService.cancelarReserva(id));
     }
+
+    @GetMapping("/mis-reservas")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<List<ReservaResponse>> obtenerMisReservas() {
+        return ResponseEntity.ok(reservaService.obtenerMisReservas());
+    }
 }

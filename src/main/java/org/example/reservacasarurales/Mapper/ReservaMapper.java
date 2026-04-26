@@ -27,7 +27,7 @@ public class ReservaMapper {
         res.setFechaInicio(r.getFechaInicio());
         res.setFechaFin(r.getFechaFin()); 
         res.setNoches(r.getNoches());
-        res.setConfirmada(r.isConfirmada());
+        res.setEstado(r.getEstado().name());
 
         //  HU017
         res.setFechaLimitePago(r.getFechaLimitePago());

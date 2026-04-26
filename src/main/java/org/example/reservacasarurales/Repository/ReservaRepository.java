@@ -4,6 +4,7 @@ package org.example.reservacasarurales.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.example.reservacasarurales.Entity.EstadoReserva;
 import org.example.reservacasarurales.Entity.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +18,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     @Query("""
     SELECT r FROM Reserva r
     WHERE r.casaRural.codigoCasa = :casaId
-    AND r.confirmada = true
+    AND r.estado <> org.example.reservacasarurales.Entity.EstadoReserva.CANCELADA
     AND (
         (:fechaInicio BETWEEN r.fechaInicio AND r.fechaFin)
         OR (:fechaFin BETWEEN r.fechaInicio AND r.fechaFin)
@@ -35,7 +36,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     SELECT DISTINCT r FROM Reserva r
     JOIN r.dormitorios d
     WHERE d.idDormitorio IN :ids
-    AND r.confirmada = true
+    AND r.estado <> org.example.reservacasarurales.Entity.EstadoReserva.CANCELADA
     """)
     List<Reserva> findReservasPorDormitorios(@Param("ids") List<Long> ids);
 
@@ -46,5 +47,11 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     AND r.casaRural.propietario.idPropietario = :propietarioId
     """)
     List<Reserva> findPendientesByPropietario(Long propietarioId);
+
+    // Buscar reservas pendientes cuya fecha límite de pago ya pasó
+    List<Reserva> findByEstadoAndFechaLimitePagoBefore(EstadoReserva estado, LocalDate fecha);
+
+    // Buscar todas las reservas de un cliente
+    List<Reserva> findByClienteIdCliente(Long idCliente);
 
 }

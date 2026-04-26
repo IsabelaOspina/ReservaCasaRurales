@@ -12,7 +12,7 @@ public class ReservaResponse {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private int noches;
-    private boolean confirmada;
+    private String estado;
 
     private LocalDate fechaLimitePago;
     private LocalDate fechaCreacion;
