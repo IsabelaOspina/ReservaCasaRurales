@@ -48,9 +48,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     """)
     List<Reserva> findPendientesByPropietario(Long propietarioId);
 
-    // Buscar reservas pendientes cuya fecha límite de pago ya pasó
-    List<Reserva> findByEstadoAndFechaLimitePagoBefore(EstadoReserva estado, LocalDate fecha);
-
     // Buscar todas las reservas de un cliente
     List<Reserva> findByClienteIdCliente(Long idCliente);
 
