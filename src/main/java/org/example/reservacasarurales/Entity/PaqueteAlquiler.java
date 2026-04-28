@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,6 +38,10 @@ public class PaqueteAlquiler {
     @JoinColumn(name = "id_casa", nullable = false)
     private CasaRural casaRural;
 
-    @OneToMany(mappedBy = "paquete")
-    private List<Reserva> reservas;
+    @OneToMany(
+            mappedBy="paquete",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Reserva> reservas = new ArrayList<>();
 }
