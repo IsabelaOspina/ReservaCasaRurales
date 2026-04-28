@@ -65,10 +65,6 @@ public class PagoService {
             throw new RuntimeException("No se puede pagar una reserva cancelada");
         }
 
-        if (LocalDate.now().isAfter(reserva.getFechaLimitePago())) {
-            throw new RuntimeException("La reserva expiró");
-        }
-
         double total = reserva.getPaquete().getPrecio() * reserva.getNoches();
         double anticipoMinimo = total * 0.2;
 

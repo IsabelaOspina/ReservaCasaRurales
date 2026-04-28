@@ -51,4 +51,12 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     // Buscar todas las reservas de un cliente
     List<Reserva> findByClienteIdCliente(Long idCliente);
 
+    @Query("""
+    SELECT r FROM Reserva r
+    WHERE r.estado = 'PENDIENTE'
+    AND r.fechaLimitePago < CURRENT_DATE
+    AND r.casaRural.propietario.idPropietario = :propietarioId
+    """)
+    List<Reserva> findReservasExpiradas(Long propietarioId);
+
 }

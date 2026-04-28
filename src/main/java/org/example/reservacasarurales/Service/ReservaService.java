@@ -7,6 +7,7 @@ import java.util.List;
 import org.example.reservacasarurales.DTOs.Request.DisponibilidadRequest;
 import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
 import org.example.reservacasarurales.DTOs.Response.DisponibilidadResponse;
+import org.example.reservacasarurales.DTOs.Response.NotificacionResponse;
 import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
 import org.example.reservacasarurales.Entity.*;
 import org.example.reservacasarurales.Mapper.ReservaMapper;
@@ -277,5 +278,27 @@ public class ReservaService {
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public List<NotificacionResponse> obtenerNotificaciones() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        List<Reserva> reservas = reservaRepository
+                .findReservasExpiradas(propietario.getIdPropietario());
+
+        return reservas.stream().map(r -> {
+            NotificacionResponse n = new NotificacionResponse();
+            n.setMensaje("La reserva #" + r.getId() + " ha expirado");
+            n.setTelefono(r.getTelefonoContacto());
+            n.setFechaLimitePago(r.getFechaLimitePago());
+            return n;
+        }).toList();
     }
 }
