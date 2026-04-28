@@ -3,6 +3,7 @@ package org.example.reservacasarurales.Controller;
 import org.example.reservacasarurales.DTOs.Request.DisponibilidadRequest;
 import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
 import org.example.reservacasarurales.DTOs.Response.DisponibilidadResponse;
+import org.example.reservacasarurales.DTOs.Response.NotificacionResponse;
 import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
 import org.example.reservacasarurales.Service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,11 @@ public class ReservaController {
     @PreAuthorize("hasRole('CLIENTE')")
     public ResponseEntity<List<ReservaResponse>> obtenerMisReservas() {
         return ResponseEntity.ok(reservaService.obtenerMisReservas());
+    }
+
+    @GetMapping("/notificaciones")
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public ResponseEntity<List<NotificacionResponse>> obtenerNotificaciones() {
+        return ResponseEntity.ok(reservaService.obtenerNotificaciones());
     }
 }
