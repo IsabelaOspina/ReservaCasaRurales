@@ -51,6 +51,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     // Buscar todas las reservas de un cliente
     List<Reserva> findByClienteIdCliente(Long idCliente);
 
+    // Buscar reservas activas (no canceladas) de un paquete
+    List<Reserva> findByPaqueteIdPaqueteAndEstadoNot(Long idPaquete, EstadoReserva estado);
+
     @Query("""
     SELECT r FROM Reserva r
     WHERE r.estado = 'PENDIENTE'
