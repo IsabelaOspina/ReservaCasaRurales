@@ -45,6 +45,10 @@ public class PagoMapper {
         res.setMetodoPago(p.getMetodoPago() != null ? p.getMetodoPago() : null);
         res.setFechaPago(p.getFechaPago() != null ? p.getFechaPago() : null);
 
+        if (p.getReserva() != null && p.getReserva().getEstado() != null) {
+            res.setEstadoReserva(p.getReserva().getEstado().name());
+        }
+
         return res;
     }
 }

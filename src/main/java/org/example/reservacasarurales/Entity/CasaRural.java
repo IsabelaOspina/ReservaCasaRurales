@@ -53,4 +53,17 @@ public class CasaRural {
     @OneToMany(mappedBy = "casaRural", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Foto> fotos = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "casaRural",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PaqueteAlquiler> paquetes = new ArrayList<>();
+    @OneToMany(
+            mappedBy="casaRural",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Reserva> reservas = new ArrayList<>();
+
 }

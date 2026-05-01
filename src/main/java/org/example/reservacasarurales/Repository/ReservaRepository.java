@@ -4,6 +4,7 @@ package org.example.reservacasarurales.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.example.reservacasarurales.Entity.EstadoReserva;
 import org.example.reservacasarurales.Entity.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,8 +17,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     // HU020 - Validar disponibilidad REAL de la casa
     @Query("""
     SELECT r FROM Reserva r
-    WHERE r.casaRural.id = :casaId
-    AND r.confirmada = true
+    WHERE r.casaRural.codigoCasa = :casaId
+    AND r.estado <> org.example.reservacasarurales.Entity.EstadoReserva.CANCELADA
     AND (
         (:fechaInicio BETWEEN r.fechaInicio AND r.fechaFin)
         OR (:fechaFin BETWEEN r.fechaInicio AND r.fechaFin)
@@ -34,9 +35,31 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     @Query("""
     SELECT DISTINCT r FROM Reserva r
     JOIN r.dormitorios d
-    WHERE d.id IN :ids
-    AND r.confirmada = true
+    WHERE d.idDormitorio IN :ids
+    AND r.estado <> org.example.reservacasarurales.Entity.EstadoReserva.CANCELADA
     """)
     List<Reserva> findReservasPorDormitorios(@Param("ids") List<Long> ids);
+
+
+    @Query("""
+    SELECT r FROM Reserva r
+    WHERE r.estado = 'PENDIENTE'
+    AND r.casaRural.propietario.idPropietario = :propietarioId
+    """)
+    List<Reserva> findPendientesByPropietario(Long propietarioId);
+
+    // Buscar todas las reservas de un cliente
+    List<Reserva> findByClienteIdCliente(Long idCliente);
+
+    // Buscar reservas activas (no canceladas) de un paquete
+    List<Reserva> findByPaqueteIdPaqueteAndEstadoNot(Long idPaquete, EstadoReserva estado);
+
+    @Query("""
+    SELECT r FROM Reserva r
+    WHERE r.estado = 'PENDIENTE'
+    AND r.fechaLimitePago < CURRENT_DATE
+    AND r.casaRural.propietario.idPropietario = :propietarioId
+    """)
+    List<Reserva> findReservasExpiradas(Long propietarioId);
 
 }

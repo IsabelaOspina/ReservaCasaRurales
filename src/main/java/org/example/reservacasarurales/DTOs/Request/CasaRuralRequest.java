@@ -1,6 +1,7 @@
 package org.example.reservacasarurales.DTOs.Request;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -13,6 +14,6 @@ public class CasaRuralRequest {
     private int numeroCocinas;
     private int numeroComedores;
     private int plazasGaraje;
-    private List<FotoRequest> fotos; // URLs o paths
-
+    private List<MultipartFile> fotos;
+    private List<String> descripcionesFotos;
 }

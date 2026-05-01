@@ -10,9 +10,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FotoMapper {
 
-    // Mapea Foto a FotoResponse
     FotoResponse toResponse(Foto foto);
 
-    // Mapea FotoRequest a Foto
-    Foto toEntity(FotoRequest request);
 }

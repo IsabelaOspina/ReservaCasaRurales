@@ -32,13 +32,31 @@ public class SecurityConfig {
 
                         .requestMatchers("/usuario/**").permitAll()
 
+
+                        .requestMatchers("/uploads/**").permitAll()
+
                         .requestMatchers("/cliente/**")
                         .hasRole("CLIENTE")
 
                         .requestMatchers("/propietario/**")
                         .hasRole("PROPIETARIO")
 
-                        .requestMatchers("/casas/**")
+                        .requestMatchers("/casa_rural/registrar")
+                        .hasRole("PROPIETARIO")
+
+                        .requestMatchers("/casa_rural/listar")
+                        .hasAnyRole("CLIENTE","PROPIETARIO")
+
+                        .requestMatchers("/*/cocinas/registrar")
+                        .hasRole("PROPIETARIO")
+
+                        .requestMatchers("/*/cocinas/listar")
+                        .hasAnyRole("CLIENTE","PROPIETARIO")
+
+                        .requestMatchers("/*/dormitorios/registrar")
+                        .hasRole("PROPIETARIO")
+
+                        .requestMatchers("/*/dormitorios/listar")
                         .hasAnyRole("CLIENTE","PROPIETARIO")
 
                         .anyRequest()

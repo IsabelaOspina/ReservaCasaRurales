@@ -12,4 +12,5 @@ public class PagoResponse {
     private MetodoPago metodoPago;
     private LocalDate fechaPago;
     private boolean confirmado;
+    private String estadoReserva;
 }

@@ -9,10 +9,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {FotoMapper.class})
 public interface CasaRuralMapper {
 
-    @Mapping(target = "fotos", source = "fotos")
     CasaRuralResponse toResponse(CasaRural casa);
 
-    @Mapping(target = "fotos", source = "fotos")
+    @Mapping(target = "fotos", ignore = true)
     CasaRural toEntity(CasaRuralRequest request);
 }
-

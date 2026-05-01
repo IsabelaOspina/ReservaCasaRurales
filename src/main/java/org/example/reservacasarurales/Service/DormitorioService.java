@@ -68,6 +68,17 @@ public class DormitorioService {
             throw new MaxDormitoriosException(casa.getNumeroDormitorios());
         }
 
+        // contar dormitorios con baño
+        long dormitoriosConBano = casa.getDormitorios()
+                .stream()
+                .filter(Dormitorio::isTieneBano)
+                .count();
+
+        // validar baños
+        if (request.isTieneBano() && dormitoriosConBano >= casa.getNumeroBanos()) {
+            throw new MaxDormitoriosException(casa.getNumeroBanos());
+        }
+
         // crear dormitorio
         Dormitorio dormitorio = dormitorioMapper.toEntity(request);
         dormitorio.setCasaRural(casa);

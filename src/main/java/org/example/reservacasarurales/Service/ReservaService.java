@@ -7,6 +7,7 @@ import java.util.List;
 import org.example.reservacasarurales.DTOs.Request.DisponibilidadRequest;
 import org.example.reservacasarurales.DTOs.Request.ReservaRequest;
 import org.example.reservacasarurales.DTOs.Response.DisponibilidadResponse;
+import org.example.reservacasarurales.DTOs.Response.NotificacionResponse;
 import org.example.reservacasarurales.DTOs.Response.ReservaResponse;
 import org.example.reservacasarurales.Entity.*;
 import org.example.reservacasarurales.Mapper.ReservaMapper;
@@ -47,14 +48,14 @@ public class ReservaService {
     public ReservaResponse crearReserva(ReservaRequest request) {
 
         Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+            SecurityContextHolder.getContext().getAuthentication();
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         String correo = usuario.getCorreoElectronico();
 
         System.out.println("Correo autenticado: " + correo);
-
+        
         Cliente cliente = clienteRepository
                 .findByUsuarioCorreoElectronico(correo)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
@@ -67,6 +68,15 @@ public class ReservaService {
 
         LocalDate fechaInicio = request.getFechaInicio();
         LocalDate fechaFin = fechaInicio.plusDays(request.getNoches());
+
+        // VALIDAR VIGENCIA DEL PAQUETE
+        if (fechaInicio.isBefore(paquete.getFechaInicio()) ||
+                fechaFin.isAfter(paquete.getFechaFin())) {
+
+            throw new RuntimeException(
+                    "La reserva está fuera del rango de vigencia del paquete de alquiler"
+            );
+        }
 
         // validar disponibilidad
         validarDisponibilidadCasa(request.getCasaId(), fechaInicio, fechaFin);
@@ -107,17 +117,16 @@ public class ReservaService {
 
         reserva.setFechaInicio(fechaInicio);
         reserva.setFechaFin(fechaFin);
-        reserva.setConfirmada(false);
         reserva.setFechaCreacion(LocalDate.now());
         reserva.setFechaLimitePago(LocalDate.now().plusDays(3)); //HU017
+
+        reserva.setEstado(EstadoReserva.PENDIENTE);
 
         return mapper.toResponse(reservaRepository.save(reserva));
     }
 
 
     // DISPONIBILIDAD (HU020)
-
-
     public DisponibilidadResponse verificarDisponibilidad(DisponibilidadRequest request) {
 
         CasaRural casa = casaRepository.findById(request.getCasaId())
@@ -125,6 +134,19 @@ public class ReservaService {
 
         LocalDate inicio = request.getFechaInicio();
         LocalDate fin = inicio.plusDays(request.getNoches());
+
+        PaqueteAlquiler paquete = paqueteRepository.findById(request.getPaqueteId())
+                .orElseThrow(() -> new RuntimeException("Paquete no encontrado"));
+
+        // VALIDAR VIGENCIA DEL PAQUETE
+        if (inicio.isBefore(paquete.getFechaInicio()) ||
+                fin.isAfter(paquete.getFechaFin())) {
+
+            return new DisponibilidadResponse(
+                    false,
+                    "El paquete de alquiler no está vigente para esas fechas"
+            );
+        }
 
         List<Reserva> conflictos = reservaRepository.buscarReservasEnConflicto(
                 request.getCasaId(),
@@ -138,6 +160,7 @@ public class ReservaService {
                 disponible,
                 disponible ? "Disponible" : "No disponible en esas fechas"
         );
+
     }
 
 
@@ -179,5 +202,97 @@ public class ReservaService {
             }
         }
 
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public List<ReservaResponse> obtenerReservasPendientes() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        return reservaRepository.findPendientesByPropietario(propietario.getIdPropietario())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public ReservaResponse cancelarReserva(Long id) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+
+        if (!reserva.getCasaRural().getPropietario().getIdPropietario()
+                .equals(propietario.getIdPropietario())) {
+            throw new RuntimeException("No puedes cancelar esta reserva");
+        }
+
+
+        double total = reserva.getPaquete().getPrecio() * reserva.getNoches();
+        double anticipoMinimo = total * 0.2;
+        double totalPagado = pagoService.calcularTotalPagado(reserva.getId());
+
+        if (totalPagado >= anticipoMinimo) {
+            throw new RuntimeException("No se puede cancelar, ya se pagó el 20%");
+        }
+
+        
+        if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
+            throw new RuntimeException("Solo se pueden cancelar reservas pendientes");
+        }
+
+        reserva.setEstado(EstadoReserva.CANCELADA);
+
+        return mapper.toResponse(reservaRepository.save(reserva));
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    public List<ReservaResponse> obtenerMisReservas() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Cliente cliente = clienteRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+        return reservaRepository.findByClienteIdCliente(cliente.getIdCliente())
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public List<NotificacionResponse> obtenerNotificaciones() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        Propietario propietario = propietarioRepository
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
+
+        List<Reserva> reservas = reservaRepository
+                .findReservasExpiradas(propietario.getIdPropietario());
+
+        return reservas.stream().map(r -> {
+            NotificacionResponse n = new NotificacionResponse();
+            n.setMensaje("La reserva #" + r.getId() + " ha expirado");
+            n.setTelefono(r.getTelefonoContacto());
+            n.setFechaLimitePago(r.getFechaLimitePago());
+            return n;
+        }).toList();
     }
 }

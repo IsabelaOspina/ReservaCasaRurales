@@ -1,11 +1,13 @@
 package org.example.reservacasarurales.Controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.reservacasarurales.DTOs.Request.DividirPaqueteRequest;
 import org.example.reservacasarurales.DTOs.Request.PaqueteAlquilerRequest;
-import org.example.reservacasarurales.DTOs.Request.PaqueteAlquilerRequest;
+import org.example.reservacasarurales.DTOs.Response.OcupacionPaqueteResponse;
 import org.example.reservacasarurales.DTOs.Response.PaqueteAlquilerResponse;
 import org.example.reservacasarurales.Service.PaqueteAlquilerService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,6 +48,28 @@ public class PaqueteAlquilerController {
 
         return ResponseEntity.ok(
                 paqueteService.listarPaquetesPorCasa(codigoCasa)
+        );
+    }
+
+    // CALENDARIO DE OCUPACIÓN
+    @GetMapping("/casa/{codigoCasa}/ocupacion")
+    public ResponseEntity<List<OcupacionPaqueteResponse>> obtenerOcupacion(
+            @PathVariable Long codigoCasa) {
+
+        return ResponseEntity.ok(
+                paqueteService.obtenerOcupacionPorCasa(codigoCasa)
+        );
+    }
+
+    // DIVIDIR PAQUETE
+    @PostMapping("/{idPaquete}/dividir")
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public ResponseEntity<List<PaqueteAlquilerResponse>> dividirPaquete(
+            @PathVariable Long idPaquete,
+            @RequestBody DividirPaqueteRequest request) {
+
+        return ResponseEntity.ok(
+                paqueteService.dividirPaquete(idPaquete, request)
         );
     }
 }
