@@ -67,9 +67,11 @@ public class ReservaService {
         LocalDate fechaFin = fechaInicio.plusDays(request.getNoches());
 
         // ===== HU-26: VALIDAR CASA ENTERA (solo agregado) =====
-        if (request.getDormitoriosIds() == null || request.getDormitoriosIds().isEmpty()) {
-            if (reservaRepository.existsByPaqueteIdAndDormitoriosIsNotNull(request.getPaqueteId())) {
-                throw new RuntimeException("No se puede reservar la casa entera porque ya hay habitaciones reservadas en este paquete");
+        if ("CASA_COMPLETA_Y_HABITACIONES".equalsIgnoreCase(paquete.getTipoAlquiler().name())) {
+            if (request.getDormitoriosIds() == null || request.getDormitoriosIds().isEmpty()) {
+                if (reservaRepository.existsByPaqueteIdAndDormitoriosIsNotNull(request.getPaqueteId())) {
+                    throw new RuntimeException("No se puede reservar la casa entera porque ya hay habitaciones reservadas en este paquete");
+                }
             }
         }
         // ===== FIN HU-26 =====
