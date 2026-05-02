@@ -27,6 +27,14 @@ public class PagoController {
         return ResponseEntity.ok(pagoService.registrarPago(request));
     }
 
+    /**
+     * Registro de un cobro recibido por el propietario de la casa (mismo cuerpo que {@code POST /pagos}).
+     */
+    @PostMapping("/registro-propietario")
+    public ResponseEntity<PagoResponse> registrarPagoPropietario(@RequestBody PagoRequest request) {
+        return ResponseEntity.ok(pagoService.registrarPagoRecibidoPropietario(request));
+    }
+
     @GetMapping("/info/{reservaId}")
     public ResponseEntity<PagoInfoResponse> obtenerInfo(@PathVariable Long reservaId) {
         return ResponseEntity.ok(pagoService.obtenerInfoPago(reservaId));

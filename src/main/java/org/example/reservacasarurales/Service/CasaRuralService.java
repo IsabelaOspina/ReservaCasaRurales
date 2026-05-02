@@ -148,6 +148,19 @@ public class CasaRuralService {
                 .toList();
     }
 
+    @PreAuthorize("hasRole('CLIENTE')")
+    public List<CasaRuralResponse> buscarPorPoblacion(String poblacion) {
 
+        if (poblacion == null || poblacion.isBlank()) {
+            throw new IllegalArgumentException("Indique una población para buscar");
+        }
+
+        String criterio = poblacion.trim();
+
+        return casaRuralRepository.findByPoblacionContainingIgnoreCase(criterio)
+                .stream()
+                .map(casaRuralMapper::toResponse)
+                .toList();
+    }
 
 }
