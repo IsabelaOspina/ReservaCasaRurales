@@ -14,6 +14,9 @@ public interface CasaRuralRepository extends JpaRepository<CasaRural, Long> {
 
     Optional<CasaRural> findByCodigoCasa(Long codigoCasa);
 
+    /** Búsqueda por población (subcadena, ignora mayúsculas). */
+    List<CasaRural> findByPoblacionContainingIgnoreCase(String poblacion);
+
     boolean existsByCodigoCasaAndPropietarioIdPropietario(
             Long codigoCasa,
             Long idPropietario

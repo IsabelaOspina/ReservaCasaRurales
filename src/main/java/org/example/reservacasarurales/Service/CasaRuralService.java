@@ -135,8 +135,31 @@ public class CasaRuralService {
         return casaRuralMapper.toResponse(casa);
     }
 
+    /**
+     * Consulta de ficha de casa por código (misma respuesta que el detalle genérico), solo rol cliente.
+     */
+    @PreAuthorize("hasRole('CLIENTE')")
+    public CasaRuralResponse obtenerCasaPorCodigoParaCliente(Long codigoCasa) {
+        return obtenerCasaPorId(codigoCasa);
+    }
+
     public List<CasaRuralResponse> listarCasas() {
         return casaRuralRepository.findAll()
+                .stream()
+                .map(casaRuralMapper::toResponse)
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('CLIENTE')")
+    public List<CasaRuralResponse> buscarPorPoblacion(String poblacion) {
+
+        if (poblacion == null || poblacion.isBlank()) {
+            throw new IllegalArgumentException("Indique una población para buscar");
+        }
+
+        String criterio = poblacion.trim();
+
+        return casaRuralRepository.findByPoblacionContainingIgnoreCase(criterio)
                 .stream()
                 .map(casaRuralMapper::toResponse)
                 .toList();

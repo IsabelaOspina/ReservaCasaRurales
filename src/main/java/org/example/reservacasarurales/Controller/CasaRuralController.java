@@ -69,6 +69,51 @@ public class CasaRuralController {
         }
     }
 
+    @GetMapping("/listar")
+    public ResponseEntity<List<CasaRuralResponse>> listarCasas() {
+
+        List<CasaRuralResponse> casas = casaRuralService.listarCasas();
+
+        return ResponseEntity.ok(casas);
+    }
+
+    /**
+     * Búsqueda de casas rurales cuya población contiene el texto indicado (sin distinguir mayúsculas).
+     */
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPorPoblacion(@RequestParam("poblacion") String poblacion) {
+
+        try {
+
+            List<CasaRuralResponse> casas = casaRuralService.buscarPorPoblacion(poblacion);
+
+            return ResponseEntity.ok(casas);
+
+        } catch (IllegalArgumentException e) {
+
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Ficha de una casa rural por su código (características completas en {@link CasaRuralResponse}).
+     */
+    @GetMapping("/cliente/codigo/{codigoCasa}")
+    public ResponseEntity<?> obtenerCasaPorCodigoCliente(@PathVariable Long codigoCasa) {
+
+        try {
+
+            CasaRuralResponse response = casaRuralService.obtenerCasaPorCodigoParaCliente(codigoCasa);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/{codigoCasa}")
     public ResponseEntity<?> obtenerCasa(@PathVariable Long codigoCasa) {
 
@@ -84,15 +129,5 @@ public class CasaRuralController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
-
-    @GetMapping("/listar")
-    public ResponseEntity<List<CasaRuralResponse>> listarCasas() {
-
-        List<CasaRuralResponse> casas = casaRuralService.listarCasas();
-
-        return ResponseEntity.ok(casas);
-    }
-
-
 
 }
