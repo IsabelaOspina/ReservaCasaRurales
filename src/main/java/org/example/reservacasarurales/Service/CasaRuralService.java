@@ -140,6 +140,14 @@ public class CasaRuralService {
         return casaRuralMapper.toResponse(casa);
     }
 
+    /**
+     * Consulta de ficha de casa por código (misma respuesta que el detalle genérico), solo rol cliente.
+     */
+    @PreAuthorize("hasRole('CLIENTE')")
+    public CasaRuralResponse obtenerCasaPorCodigoParaCliente(Long codigoCasa) {
+        return obtenerCasaPorId(codigoCasa);
+    }
+
     public List<CasaRuralResponse> listarCasas() {
 
         return casaRuralRepository.findAll()

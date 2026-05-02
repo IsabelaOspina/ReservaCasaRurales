@@ -52,6 +52,9 @@ public class SecurityConfig {
                         .requestMatchers("/casa_rural/buscar")
                         .hasRole("CLIENTE")
 
+                        .requestMatchers("/casa_rural/cliente/codigo/**")
+                        .hasRole("CLIENTE")
+
                         .requestMatchers("/*/cocinas/registrar")
                         .hasRole("PROPIETARIO")
 

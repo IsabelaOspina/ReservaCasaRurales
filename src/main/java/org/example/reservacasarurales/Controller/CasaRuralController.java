@@ -95,6 +95,25 @@ public class CasaRuralController {
         }
     }
 
+    /**
+     * Ficha de una casa rural por su código (características completas en {@link CasaRuralResponse}).
+     */
+    @GetMapping("/cliente/codigo/{codigoCasa}")
+    public ResponseEntity<?> obtenerCasaPorCodigoCliente(@PathVariable Long codigoCasa) {
+
+        try {
+
+            CasaRuralResponse response = casaRuralService.obtenerCasaPorCodigoParaCliente(codigoCasa);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/{codigoCasa}")
     public ResponseEntity<?> obtenerCasa(@PathVariable Long codigoCasa) {
 
