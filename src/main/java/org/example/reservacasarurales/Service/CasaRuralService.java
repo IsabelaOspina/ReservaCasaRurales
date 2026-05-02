@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class CasaRuralService {
 
@@ -113,23 +114,32 @@ public class CasaRuralService {
         Usuario usuario = (Usuario) authentication.getPrincipal();
 
         Propietario propietario = propietarioRepository
-                .findByUsuarioCorreoElectronico(
-                        usuario.getCorreoElectronico()
-                )
-                .orElseThrow(() ->
-                        new RuntimeException("Propietario no encontrado"));
-
+                .findByUsuarioCorreoElectronico(usuario.getCorreoElectronico())
+                .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
 
         if (!casaRuralRepository
                 .existsByCodigoCasaAndPropietarioIdPropietario(
                         codigoCasa,
                         propietario.getIdPropietario()
                 )) {
-            throw new RuntimeException(
-                    "No tienes permisos para eliminar esta casa o no existe"
-            );
+            throw new RuntimeException("No tienes permisos para eliminar esta casa o no existe");
         }
 
         casaRuralRepository.deleteById(codigoCasa);
     }
+
+    // ===== MÉTODOS AGREGADOS =====
+    public CasaRuralResponse obtenerCasaPorId(Long codigoCasa) {
+        CasaRural casa = casaRuralRepository.findByCodigoCasa(codigoCasa)
+                .orElseThrow(() -> new RuntimeException("Casa rural no encontrada"));
+        return casaRuralMapper.toResponse(casa);
+    }
+
+    public List<CasaRuralResponse> listarCasas() {
+        return casaRuralRepository.findAll()
+                .stream()
+                .map(casaRuralMapper::toResponse)
+                .toList();
+    }
+
 }

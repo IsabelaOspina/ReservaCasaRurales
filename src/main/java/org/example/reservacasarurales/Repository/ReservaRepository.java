@@ -62,4 +62,14 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     """)
     List<Reserva> findReservasExpiradas(Long propietarioId);
 
+
+    // HU-26: Verificar si un paquete tiene al menos una habitación reservada (no cancelada)
+    @Query("""
+    SELECT COUNT(r) > 0 FROM Reserva r
+    JOIN r.dormitorios d
+    WHERE r.paquete.idPaquete = :paqueteId
+    AND r.estado <> org.example.reservacasarurales.Entity.EstadoReserva.CANCELADA
+    """)
+    boolean existsByPaqueteIdAndDormitoriosIsNotNull(@Param("paqueteId") Long paqueteId);
+
 }

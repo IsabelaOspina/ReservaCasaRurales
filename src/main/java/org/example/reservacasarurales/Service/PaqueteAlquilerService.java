@@ -256,4 +256,4 @@ public class PaqueteAlquilerService {
                 .map(paqueteMapper::toResponse)
                 .toList();
     }
-}
+}

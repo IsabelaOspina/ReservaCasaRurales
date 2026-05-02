@@ -5,7 +5,9 @@ import org.example.reservacasarurales.DTOs.Request.DividirPaqueteRequest;
 import org.example.reservacasarurales.DTOs.Request.PaqueteAlquilerRequest;
 import org.example.reservacasarurales.DTOs.Response.OcupacionPaqueteResponse;
 import org.example.reservacasarurales.DTOs.Response.PaqueteAlquilerResponse;
+import org.example.reservacasarurales.Repository.ReservaRepository;
 import org.example.reservacasarurales.Service.PaqueteAlquilerService;
+import org.example.reservacasarurales.Service.ReservaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import java.util.List;
 public class PaqueteAlquilerController {
 
     private final PaqueteAlquilerService paqueteService;
+    private final ReservaRepository reservaRepository;
 
     // CREAR
     @PostMapping("/{codigoCasa}/crear")
@@ -71,5 +74,11 @@ public class PaqueteAlquilerController {
         return ResponseEntity.ok(
                 paqueteService.dividirPaquete(idPaquete, request)
         );
+    }
+
+    @GetMapping("/{idPaquete}/casa-entera-disponible")
+    public ResponseEntity<Boolean> casaEnteraDisponible(@PathVariable Long idPaquete) {
+        boolean tieneHabitaciones = reservaRepository.existsByPaqueteIdAndDormitoriosIsNotNull(idPaquete);
+        return ResponseEntity.ok(!tieneHabitaciones);
     }
 }
