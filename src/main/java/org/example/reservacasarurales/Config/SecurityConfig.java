@@ -66,7 +66,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/*/dormitorios/listar")
                         .hasAnyRole("CLIENTE","PROPIETARIO")
-                        .requestMatchers("/").permitAll()
+                        //.requestMatchers("/").permitAll()
                         .anyRequest()
                         .authenticated()
                 )
