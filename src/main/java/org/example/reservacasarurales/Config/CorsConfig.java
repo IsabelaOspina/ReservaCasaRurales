@@ -15,11 +15,12 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                "http://localhost:4200",
-                                "https://reservas-front-h53zp60es-nikollocampos-projects.vercel.app/"
+                                "https://reserva-front-v2.vercel.app",
+                                "https://reserva-front.vercel.app"
                         )
                         .allowedMethods("*")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }
